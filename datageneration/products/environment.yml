@@ -1,0 +1,7 @@
+name: products
+channels:
+  - conda-forge
+dependencies:
+  - python=3.9
+  - faker
+  - azure-storage-file-datalake
