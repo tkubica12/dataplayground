@@ -4,8 +4,8 @@ import os
 from azure.storage.filedatalake import DataLakeFileClient, DataLakeServiceClient
 
 # Get input parameters from environment
-storageSas = os.getenv('PRODUCTS_SAS')
-count = int(os.getenv('PRODUCTS_COUNT', 100))
+storageSas = os.getenv('STORAGE_SAS')
+count = int(os.getenv('COUNT', 100))
 
 if not storageSas:
     print('Please provide storage connection string via PRODUCTS_SAS environmental variable')
