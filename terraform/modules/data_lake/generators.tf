@@ -15,7 +15,7 @@ resource "azurerm_container_group" "generate_users" {
     memory = "2"
 
     environment_variables = {
-      "COUNT" = "1000000"
+      "COUNT" = tostring(var.users_count)
     }
 
     secure_environment_variables = {
@@ -39,7 +39,7 @@ resource "azurerm_container_group" "generate_products" {
     memory = "2"
 
     environment_variables = {
-      "COUNT" = "100000"
+      "COUNT" = tostring(var.products_count)
     }
 
     secure_environment_variables = {
@@ -64,7 +64,7 @@ resource "azurerm_container_group" "stream_pageviews" {
 
     environment_variables = {
       "EVENTHUB_NAMESPACE" = azurerm_eventhub_namespace.main.name
-      "USER_MAX_ID"        = "999999"
+      "USER_MAX_ID"        = tostring(var.users_count -1)
     }
 
     secure_environment_variables = {
@@ -89,9 +89,9 @@ resource "azurerm_container_group" "generate_orders" {
     memory = "2"
 
     environment_variables = {
-      "COUNT"          = "10000000"
-      "USER_MAX_ID"    = "999999"
-      "PRODUCT_MAX_ID" = "99999"
+      "COUNT"          = tostring(var.orders_count)
+      "USER_MAX_ID"    = tostring(var.users_count -1)
+      "PRODUCT_MAX_ID" = tostring(var.products_count -1)
       "SQL_SERVER"     = azurerm_mssql_server.main.fully_qualified_domain_name
       "SQL_DATABASE"   = azurerm_mssql_database.orders.name
       "SQL_USER"       = azurerm_mssql_server.main.administrator_login

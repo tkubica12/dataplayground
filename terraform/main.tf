@@ -19,4 +19,7 @@ module "data_lake" {
   name_prefix         = random_string.random.result
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
+  users_count         = 5000000
+  products_count      = 100000
+  orders_count        = 100000000
 }

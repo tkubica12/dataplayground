@@ -8,7 +8,7 @@ As part of demo I am going to generate different types of data:
   - Items table consisting of orderId, rowId and productId 
 
 # Deployment
-Everything is automated as part of data perparation Terraform module. Each generator/streamer runs as Azure Container Instance.
+Everything is automated as part of data perparation Terraform module. Each generator/streamer runs as Azure Container Instance. To modify ammount of data generated you can change module inputs in main.tf file.
 
 # Dev
 For code changes or running generators locally here are few notes and commands.

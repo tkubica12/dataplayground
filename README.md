@@ -4,7 +4,7 @@ This repo contains my data learning project. In order to play with enough data I
 Whole playground is designed to be completely automated with no prior dependencies. By running single Terraform template everything should get deployed, generators, streamers and other software started as containers hosted in Azure and Databrics, Synapse or Data Factory configurations pushed using proper Terraform providers or via Git references.
 
 ## Deployment
-Go to terraform folder and run it. Note that generators are started as Azure Container Instances and might take few hours to complete.
+Go to terraform folder and run it. Note that generators are started as Azure Container Instances and might take few hours to complete. In main.tf when calling modules you can modify certain inputs such as ammount of data generated.
 
 ```bash
 cd terraform
