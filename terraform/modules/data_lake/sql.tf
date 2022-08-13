@@ -25,6 +25,21 @@ resource "azurerm_mssql_database" "orders" {
   max_size_gb                 = 1024
   read_scale                  = false
   sku_name                    = "GP_S_Gen5_2"
+  min_capacity                = 0.5
   zone_redundant              = false
   storage_account_type        = "Local"
 }
+
+resource "azurerm_mssql_firewall_rule" "azureservices" {
+  name             = "AzureServices"
+  server_id        = azurerm_mssql_server.main.id
+  start_ip_address = "0.0.0.0"
+  end_ip_address   = "0.0.0.0"
+}
+
+# resource "azurerm_mssql_firewall_rule" "all" {
+#   name             = "all"
+#   server_id        = azurerm_mssql_server.main.id
+#   start_ip_address = "0.0.0.0"
+#   end_ip_address   = "255.255.255.255"
+# }
