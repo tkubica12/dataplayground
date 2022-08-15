@@ -10,6 +10,10 @@ variable "location" {
   type = string
 }
 
+variable "keyvault_id" {
+  type = string
+}
+
 # Data Generators
 variable "users_count" {
   type    = number
