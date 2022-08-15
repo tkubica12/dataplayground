@@ -28,13 +28,28 @@ Data sources:
 
 See [datageneration](datageneration/datageneration.md) for more details.
 
-## Data preparation and movement (all TBD)
-- Data Factory jobs to consolidate all data in Data Lake
-- Event Hub data export (as alternative to Data Factory)
+## Data preparation and movement
+This part contains consolidation of data sources into bronze tier and potentialy some manipulations and preparation.
+
+- Data Factory gets deployed by Terraform with
+  - Linked services
+    - Key Vault service authenticated via User Managed Identity
+    - SQL service with secrets stored in Key Vault
+    - Data Lake gen2 service authenticated via User Managed Identity
+  - Datasets
+    - order and items tables in SQL (source)
+    - order and items as Parquet files in Data Lake gen2 (sink)
+  - Pipelines
+    - Copy operation triggered every hour from SQL tables to Data Lake
+
+TBD:
+- Stream Analytics exporting to bronze tier
+- Event Hub data export (as alternative to Stream Analytics)
 - Spark jobs as alternative to Data Factory
 - Synapse pipelines as alternative to Data Factory
 
 ## Data analysis (all TBD)
+- Stream Analytics enriching pageviews data with customer information
 - Azure Databricks environment to process data and other demos (visualization, ML)
 - PowerBI dashboard to visualize data (+ using Synapse serverless to read Delta from data lake)
 - AzureML training model using data processed by Databricks
