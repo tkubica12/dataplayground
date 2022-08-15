@@ -24,5 +24,18 @@ resource "azurerm_data_factory_linked_service_azure_sql_database" "sql" {
   }
 }
 
-
-# Server=tcp:myserver.database.windows.net,1433;Database=@{linkedService().DBName};User ID=user;Password=fake;Trusted_Connection=False;Encrypt=True;Connection Timeout=30
+// Data Lake storage gen2
+resource "azurerm_data_factory_linked_custom_service" "datalake" {
+  name                 = "DataLake"
+  data_factory_id      = azurerm_data_factory.main.id
+  type                 = "AzureBlobFS"
+  type_properties_json = <<JSON
+{
+  "url":"${var.datalake_url}",
+  "credential": {
+    "referenceName": "storage-writer",
+    "type": "CredentialReference"
+    }
+}
+JSON
+}
