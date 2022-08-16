@@ -16,16 +16,20 @@ terraform apply -auto-approve
 ## Current architecture
 ```mermaid
 graph LR;
-    Users_generator -- JSON lines flat file --> Data_Lake;
-    Products_generator -- JSON file per product --> Data_Lake;
-    Orders -- table referencing user ID and product ID --> SQL;
-    Items -- table referencing orders --> SQL;
+    Users_generator -- JSON lines flat file --> Data_Lake_Bronze;
+    Products_generator -- JSON file per product --> Data_Lake_Bronze;
+    Orders_generator -- table referencing user ID and product ID --> SQL;
+    Items_generator -- table referencing orders --> SQL;
     Page_views_generator -- every second JSON event --> Event_Hub;
-    Event_Hub -- Capture --> Data_Lake;
-    Event_Hub --> Stream_Analytics -- RAW data --> Data_Lake;
-    SQL --> Data_Factory --> Data_Lake;
-```
+    Event_Hub -- Capture as Avro --> Data_Lake_Bronze;
+    Event_Hub --> Stream_Analytics -- RAW data as Parquet --> Data_Lake_Bronze;
+    SQL --> Data_Factory -- Parquet --> Data_Lake_Bronze;
 
+    classDef generators fill:#9bd9e6,stroke:#333,stroke-width:2px;
+    class Users_generator,Products_generator,Orders_generator,Items_generator,Page_views_generator generators;
+
+    style Data_Lake_Bronze fill:#b45f06,stroke:#333,stroke-width:2px
+```
 
 ## Possible target architecture (TBD)
 ```mermaid
@@ -35,18 +39,29 @@ graph LR;
     Orders_generator -- table referencing user ID and product ID --> SQL;
     Items_generator -- table referencing orders --> SQL;
     Page_views_generator -- every second JSON event --> Event_Hub;
-    Event_Hub -- Capture --> Data_Lake_Bronze;
-    Event_Hub --> Stream_Analytics -- RAW data --> Data_Lake_Bronze;
+    Event_Hub -- Capture as Avro --> Data_Lake_Bronze;
+    Event_Hub --> Stream_Analytics -- RAW data as Parquet --> Data_Lake_Bronze;
     Event_Hub --> Stream_Analytics -- data enrichment --> Data_Lake_Silver;
     Event_Hub --> Stream_Analytics -- data enrichment --> Real_time_detection;
     Event_Hub --> Databricks -- RAW data --> Data_Lake_Bronze;
     Event_Hub --> Databricks -- data enrichment --> Real_time_detection;
-    SQL --> Data_Factory --> Data_Lake_Bronze;
-    SQL --> Databricks --> Data_Lake_Bronze;
+    SQL --> Data_Factory -- Parquet --> Data_Lake_Bronze;
+    SQL --> Databricks -- Parquet --> Data_Lake_Bronze;
     Data_Lake_Bronze --> Databricks -- processing --> Data_Lake_Silver;
     Data_Lake_Silver --> AzureML --> Model_API;
     Data_Lake_Silver --> Databricks --> Data_Lake_Gold;
     Data_Lake_Gold -- Delta --> Synapse/Databricks_serverless --> PowerBI;
+
+    
+    classDef generators fill:#9bd9e6,stroke:#333,stroke-width:2px;
+    class Users_generator,Products_generator,Orders_generator,Items_generator,Page_views_generator generators;
+
+    style Data_Lake_Bronze fill:#b45f06,stroke:#333,stroke-width:2px
+    style Data_Lake_Silver fill:#eeeeee,stroke:#333,stroke-width:2px
+    style Data_Lake_Gold fill:#f7b511,stroke:#333,stroke-width:2px
+        
+    classDef endstate fill:#d1e6a8,stroke:#333,stroke-width:2px;
+    class Model_API,PowerBI,Real_time_detection endstate;
 ```
 
 ## Data generation
