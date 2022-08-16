@@ -28,7 +28,7 @@ resource "azurerm_data_factory_custom_dataset" "orders" {
 {
     "location": {
         "type": "AzureBlobFSLocation",
-        "fileName": "fromDataFactory",
+        "fileName": "fromDataFactory.parquet",
         "folderPath": "orders",
         "fileSystem": "bronze"
     },
@@ -55,7 +55,7 @@ resource "azurerm_data_factory_custom_dataset" "items" {
 {
     "location": {
         "type": "AzureBlobFSLocation",
-        "fileName": "fromDataFactory",
+        "fileName": "fromDataFactory.parquet",
         "folderPath": "items",
         "fileSystem": "bronze"
     },

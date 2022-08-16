@@ -31,15 +31,19 @@ module "data_lake" {
 
 // ETL to Data Lake
 module "etl" {
-  source              = "./modules/etl"
-  name_prefix         = random_string.random.result
-  resource_group_name = azurerm_resource_group.main.name
-  location            = azurerm_resource_group.main.location
-  keyvault_id         = azurerm_key_vault.main.id
-  keyvault_url        = azurerm_key_vault.main.vault_uri
-  datalake_url        = module.data_lake.datalake_url
-  kv-reader_id        = azurerm_user_assigned_identity.kv-reader.id
-  storage-writer_id   = module.data_lake.storage-writer_id
+  source                  = "./modules/etl"
+  name_prefix             = random_string.random.result
+  resource_group_name     = azurerm_resource_group.main.name
+  location                = azurerm_resource_group.main.location
+  keyvault_id             = azurerm_key_vault.main.id
+  keyvault_url            = azurerm_key_vault.main.vault_uri
+  datalake_url            = module.data_lake.datalake_url
+  datalake_name           = module.data_lake.datalake_name
+  datalake_id             = module.data_lake.datalake_id
+  kv-reader_id            = azurerm_user_assigned_identity.kv-reader.id
+  storage-writer_id       = module.data_lake.storage-writer_id
+  eventhub_name           = module.data_lake.eventhub_name
+  eventhub_namespace_name = module.data_lake.eventhub_namespace_name
 
   depends_on = [
     azurerm_role_assignment.currentuser-kv

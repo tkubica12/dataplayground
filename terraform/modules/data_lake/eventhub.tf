@@ -35,3 +35,11 @@ resource "azurerm_eventhub_authorization_rule" "pageviewsSender" {
   send                = true
   manage              = false
 }
+
+output "eventhub_namespace_name" {
+  value = azurerm_eventhub_namespace.main.name
+}
+
+output "eventhub_name" {
+  value = azurerm_eventhub.pageviews.name
+}

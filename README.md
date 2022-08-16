@@ -13,6 +13,8 @@ terraform init
 terraform apply -auto-approve
 ```
 
+
+
 ## Data generation
 Data generation module deploys following resources together with containers responsible for data generation and streaming:
 - Azure Storage Data Lake gen2
@@ -41,10 +43,10 @@ This part contains consolidation of data sources into bronze tier and potentialy
     - order and items as Parquet files in Data Lake gen2 (sink)
   - Pipelines
     - Copy operation triggered every hour from SQL tables to Data Lake
-
+- Stream Analytics getting pageviews stream to bronze tier as Parquet files
+- Event Hub data capture to bronze tier as Avro files
+  
 TBD:
-- Stream Analytics exporting to bronze tier
-- Event Hub data export (as alternative to Stream Analytics)
 - Spark jobs as alternative to Data Factory
 - Synapse pipelines as alternative to Data Factory
 

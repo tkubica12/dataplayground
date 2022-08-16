@@ -64,8 +64,33 @@ resource "azurerm_role_assignment" "storage-write" {
   principal_id         = azurerm_user_assigned_identity.storage-writer.principal_id
 }
 
+// Add current account RBAC
+data "azurerm_client_config" "storage" {
+}
+
+resource "random_uuid" "storage-currentuser" {
+}
+
+resource "azurerm_role_assignment" "storage-currentuser" {
+  name                 = random_uuid.storage-currentuser.result
+  scope                = azurerm_storage_account.main.id
+  role_definition_name = "Storage Blob Data Owner"
+  principal_id         = data.azurerm_client_config.storage.object_id
+}
+
+
+
+
 output "datalake_url" {
   value = azurerm_storage_account.main.primary_dfs_endpoint
+}
+
+output "datalake_name" {
+  value = azurerm_storage_account.main.name
+}
+
+output "datalake_id" {
+  value = azurerm_storage_account.main.id
 }
 
 output "storage-writer_id" {
