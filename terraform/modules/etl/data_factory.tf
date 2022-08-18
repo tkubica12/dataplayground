@@ -7,7 +7,8 @@ resource "azurerm_data_factory" "main" {
     type = "UserAssigned"
     identity_ids = [
       var.kv-reader_id,
-      var.storage-writer_id
+      var.storage-writer_id,
+      var.databricks_df_access_id
     ]
   }
 }
@@ -41,6 +42,25 @@ resource "azapi_resource" "storage-writer" {
       type : "ManagedIdentity"
       typeProperties : {
         resourceId : var.storage-writer_id
+      }
+    }
+  })
+
+  depends_on = [
+    azurerm_data_factory.main
+  ]
+}
+
+resource "azapi_resource" "databricks_df_access" {
+  type                      = "Microsoft.DataFactory/factories/credentials@2018-06-01"
+  name                      = "databricks_df_access"
+  parent_id                 = azurerm_data_factory.main.id
+  schema_validation_enabled = false
+  body = jsonencode({
+    properties = {
+      type : "ManagedIdentity"
+      typeProperties : {
+        resourceId : var.databricks_df_access_id
       }
     }
   })

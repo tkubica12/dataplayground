@@ -38,6 +38,22 @@ variable "storage-writer_id" {
   type = string
 }
 
+variable "databricks_df_access_id" {
+  type = string
+}
+
+variable "databricks_cluster_id" {
+  type = string
+}
+
+variable "databricks_resource_id" {
+  type = string
+}
+
+variable "databricks_domain_id" {
+  type = string
+}
+
 variable "eventhub_name" {
   type = string
 }

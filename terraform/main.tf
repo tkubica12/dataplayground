@@ -42,10 +42,24 @@ module "etl" {
   datalake_id             = module.data_lake.datalake_id
   kv-reader_id            = azurerm_user_assigned_identity.kv-reader.id
   storage-writer_id       = module.data_lake.storage-writer_id
+  databricks_df_access_id = module.databricks.databricks_df_access_id
+  databricks_cluster_id   = module.databricks.databricks_cluster_id
+  databricks_domain_id    = module.databricks.databricks_domain_id
+  databricks_resource_id  = module.databricks.databricks_resource_id
   eventhub_name           = module.data_lake.eventhub_name
   eventhub_namespace_name = module.data_lake.eventhub_namespace_name
 
   depends_on = [
     azurerm_role_assignment.currentuser-kv
   ]
+}
+
+// Databricks
+module "databricks" {
+  source                      = "./modules/databricks"
+  name_prefix                 = random_string.random.result
+  resource_group_name         = azurerm_resource_group.main.name
+  location                    = azurerm_resource_group.main.location
+  storage_account_name        = module.data_lake.datalake_name
+  storage_resource_group_name = azurerm_resource_group.main.name
 }

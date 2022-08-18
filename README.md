@@ -24,11 +24,21 @@ graph LR;
     Event_Hub -- Capture as Avro --> Data_Lake_Bronze;
     Event_Hub --> Stream_Analytics -- RAW data as Parquet --> Data_Lake_Bronze;
     SQL --> Data_Factory -- Parquet --> Data_Lake_Bronze;
+    Data_Lake_Bronze --> Databricks -- processing --> Data_Lake_Silver;
+    Data_Factory -. Orchestration .-> Databricks;
+
+    classDef generators fill:#9bd9e6,stroke:#333,stroke-width:2px;
+    class Users_generator,Products_generator,Orders_generator,Items_generator,Page_views_generator generators;
 
     classDef generators fill:#9bd9e6,stroke:#333,stroke-width:2px;
     class Users_generator,Products_generator,Orders_generator,Items_generator,Page_views_generator generators;
 
     style Data_Lake_Bronze fill:#b45f06,stroke:#333,stroke-width:2px
+    style Data_Lake_Silver fill:#eeeeee,stroke:#333,stroke-width:2px
+    style Data_Lake_Gold fill:#f7b511,stroke:#333,stroke-width:2px
+        
+    classDef endstate fill:#d1e6a8,stroke:#333,stroke-width:2px;
+    class Model_API,PowerBI,Real_time_detection endstate;
 ```
 
 ## Possible target architecture (TBD)
@@ -48,11 +58,11 @@ graph LR;
     SQL --> Data_Factory -- Parquet --> Data_Lake_Bronze;
     SQL --> Databricks -- Parquet --> Data_Lake_Bronze;
     Data_Lake_Bronze --> Databricks -- processing --> Data_Lake_Silver;
+    Data_Factory -. Orchestration .-> Databricks;
     Data_Lake_Silver --> AzureML --> Model_API;
     Data_Lake_Silver --> Databricks --> Data_Lake_Gold;
     Data_Lake_Gold -- Delta --> Synapse/Databricks_serverless --> PowerBI;
 
-    
     classDef generators fill:#9bd9e6,stroke:#333,stroke-width:2px;
     class Users_generator,Products_generator,Orders_generator,Items_generator,Page_views_generator generators;
 
@@ -94,13 +104,13 @@ This part contains consolidation of data sources into bronze tier and potentialy
     - Copy operation triggered every hour from SQL tables to Data Lake
 - Stream Analytics getting pageviews stream to bronze tier as Parquet files
 - Event Hub data capture to bronze tier as Avro files
+- Databricks processing orchestrated by Data Factory
+  - Two clusters - single node and serverless
+  - Notebook to get data from bronze tier and create Delta tables in silver tier
+  - Data movement from SQL do bronze tier and coordinated run of Databricks notebook is orchestrated via Data Factory pipeline
   
-TBD:
-- Spark jobs as alternative to Data Factory
-- Synapse pipelines as alternative to Data Factory
-
 ## Data analysis (all TBD)
 - Stream Analytics enriching pageviews data with customer information
-- Azure Databricks environment to process data and other demos (visualization, ML)
+- Azure Databricks advanced processing, visualization and ML
 - PowerBI dashboard to visualize data (+ using Synapse or Databricks serverless to read Delta from data lake)
 - AzureML training model using data processed by Databricks

@@ -47,6 +47,42 @@ data "azurerm_storage_account_blob_container_sas" "storage_sas_bronze" {
   }
 }
 
+# // SAS for Databricks
+# data "azurerm_storage_account_sas" "storage_sas_databricks" {
+#   connection_string = azurerm_storage_account.main.primary_connection_string
+#   https_only        = true
+#   signed_version    = "2021-06-08"
+
+#   resource_types {
+#     service   = true
+#     container = true
+#     object    = true
+#   }
+
+#   services {
+#     blob  = true
+#     queue = true
+#     table = true
+#     file  = true
+#   }
+
+#   start  = "2018-03-21T00:00:00Z"
+#   expiry = "2050-03-21T00:00:00Z"
+
+#   permissions {
+#     read    = true
+#     write   = true
+#     delete  = true
+#     list    = true
+#     add     = true
+#     create  = true
+#     update  = true
+#     process = true
+#     tag     = false
+#     filter  = false
+#   }
+# }
+
 // Managed Identity with storage writer rights
 resource "azurerm_user_assigned_identity" "storage-writer" {
   name                = "storage-writer"
@@ -81,18 +117,6 @@ resource "azurerm_role_assignment" "storage-currentuser" {
 
 
 
-output "datalake_url" {
-  value = azurerm_storage_account.main.primary_dfs_endpoint
-}
 
-output "datalake_name" {
-  value = azurerm_storage_account.main.name
-}
 
-output "datalake_id" {
-  value = azurerm_storage_account.main.id
-}
 
-output "storage-writer_id" {
-  value = azurerm_user_assigned_identity.storage-writer.id
-}
