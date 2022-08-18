@@ -69,4 +69,8 @@ resource "azurerm_data_factory_linked_custom_service" "databricks" {
   "existingClusterId": "${var.databricks_cluster_id}"
 }
 JSON
+
+depends_on = [
+    azapi_resource.databricks_df_access
+  ]
 }
