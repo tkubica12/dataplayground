@@ -101,7 +101,7 @@ This part contains consolidation of data sources into bronze tier and potentialy
     - order and items tables in SQL (source)
     - order and items as Parquet files in Data Lake gen2 (sink)
   - Pipelines
-    - Copy operation triggered every hour from SQL tables to Data Lake
+    - Copy operation triggered every hour from SQL tables to Data Lake followed by Databricks job to process orders, items, pageviews, products and users fro bronze tier to Delta tables in Silver tier
 - Stream Analytics getting pageviews stream to bronze tier as Parquet files
 - Event Hub data capture to bronze tier as Avro files
 - Databricks processing orchestrated by Data Factory
