@@ -34,8 +34,8 @@ data "azurerm_storage_account_blob_container_sas" "storage_sas_bronze" {
   container_name    = azurerm_storage_container.bronze.name
   https_only        = true
 
-  start  = "2018-03-21"
-  expiry = "2200-03-21"
+  start  = timeadd(timestamp(), "-24h")
+  expiry = timeadd(timestamp(), "168h")
 
   permissions {
     read   = true
