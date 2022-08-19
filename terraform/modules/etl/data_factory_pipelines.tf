@@ -125,10 +125,12 @@ resource "azurerm_data_factory_pipeline" "process_data" {
 JSON
   depends_on = [
     azurerm_data_factory_dataset_sql_server_table.items,
+    azurerm_data_factory_dataset_sql_server_table.orders,
     azurerm_data_factory_custom_dataset.items,
+    azurerm_data_factory_custom_dataset.orders,
     azurerm_data_factory_linked_custom_service.databricks,
     azurerm_data_factory_linked_service_azure_sql_database.sql,
-    azurerm_data_factory_linked_custom_service.datalake
+    azurerm_data_factory_linked_custom_service.datalake,
   ]
 
 }
