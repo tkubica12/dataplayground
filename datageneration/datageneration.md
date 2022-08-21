@@ -64,9 +64,9 @@ docker push ghcr.io/tkubica12/stream_pageviews:latest
 docker push ghcr.io/tkubica12/generate_orders:latest
 
 # Running containers locally
-docker run --rm -e STORAGE_SAS=$STORAGE_SAS -e COUNT=100 ghcr.io/tkubica12/generate_users:latest
-docker run --rm -e STORAGE_SAS=$STORAGE_SAS -e COUNT=100 ghcr.io/tkubica12/generate_users:latest
-docker run --rm -e EVENTHUB_CONNECTION_STRING=$EVENTHUB_CONNECTION_STRING -e EVENTHUB_NAMESPACE=$EVENTHUB_NAMESPACE ghcr.io/tkubica12/stream_pageviews:latest
+docker run -it --rm -e STORAGE_SAS=$STORAGE_SAS -e COUNT=100 -e VIP_COUNT=10 ghcr.io/tkubica12/generate_users:latest
+docker run -it --rm -e STORAGE_SAS=$STORAGE_SAS -e COUNT=100 ghcr.io/tkubica12/generate_users:latest
+docker run -it --rm -e EVENTHUB_CONNECTION_STRING=$EVENTHUB_CONNECTION_STRING -e EVENTHUB_NAMESPACE=$EVENTHUB_NAMESPACE ghcr.io/tkubica12/stream_pageviews:latest
 docker run --rm -it -e SQL_SERVER=$SQL_SERVER \
     -e SQL_DATABASE=$SQL_DATABASE \
     -e SQL_USER=$SQL_USER \

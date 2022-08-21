@@ -30,24 +30,23 @@ module "data_lake" {
 }
 
 // ETL to Data Lake
-module "etl" {
-  source                  = "./modules/etl"
-  name_prefix             = random_string.random.result
-  resource_group_name     = azurerm_resource_group.main.name
-  location                = azurerm_resource_group.main.location
-  keyvault_id             = azurerm_key_vault.main.id
-  keyvault_url            = azurerm_key_vault.main.vault_uri
-  datalake_url            = module.data_lake.datalake_url
-  datalake_name           = module.data_lake.datalake_name
-  datalake_id             = module.data_lake.datalake_id
-  kv-reader_id            = azurerm_user_assigned_identity.kv-reader.id
-  storage-writer_id       = module.data_lake.storage-writer_id
-  databricks_df_access_id = module.databricks.databricks_df_access_id
-  databricks_cluster_id   = module.databricks.databricks_cluster_id
-  databricks_domain_id    = module.databricks.databricks_domain_id
-  databricks_resource_id  = module.databricks.databricks_resource_id
-  eventhub_name           = module.data_lake.eventhub_name
-  eventhub_namespace_name = module.data_lake.eventhub_namespace_name
+module "data_factory" {
+  source                     = "./modules/data_factory"
+  name_prefix                = random_string.random.result
+  resource_group_name        = azurerm_resource_group.main.name
+  location                   = azurerm_resource_group.main.location
+  keyvault_id                = azurerm_key_vault.main.id
+  keyvault_url               = azurerm_key_vault.main.vault_uri
+  datalake_url               = module.data_lake.datalake_url
+  datalake_name              = module.data_lake.datalake_name
+  datalake_id                = module.data_lake.datalake_id
+  kv-reader_id               = azurerm_user_assigned_identity.kv-reader.id
+  storage-writer_id          = module.data_lake.storage-writer_id
+  databricks_df_access_id    = module.databricks.databricks_df_access_id
+  databricks_cluster_id      = module.databricks.databricks_cluster_id
+  databricks_domain_id       = module.databricks.databricks_domain_id
+  databricks_resource_id     = module.databricks.databricks_resource_id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
 
   depends_on = [
     azurerm_role_assignment.currentuser-kv
@@ -62,4 +61,18 @@ module "databricks" {
   location                    = azurerm_resource_group.main.location
   storage_account_name        = module.data_lake.datalake_name
   storage_resource_group_name = azurerm_resource_group.main.name
+}
+
+// Streaming analytics
+module "stream_analytics" {
+  source                     = "./modules/stream_analytics"
+  name_prefix                = random_string.random.result
+  resource_group_name        = azurerm_resource_group.main.name
+  location                   = azurerm_resource_group.main.location
+  datalake_url               = module.data_lake.datalake_url
+  datalake_name              = module.data_lake.datalake_name
+  datalake_id                = module.data_lake.datalake_id
+  eventhub_name              = module.data_lake.eventhub_name
+  eventhub_namespace_name    = module.data_lake.eventhub_namespace_name
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
 }

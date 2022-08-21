@@ -28,10 +28,13 @@ conf = {'bootstrap.servers': eventhub_endpoint,
 producer = Producer(conf)
 
 # Run forever
+user_id_store = 0
 while True:
-    time.sleep(1)
+    time.sleep(abs(random.gauss(1,0.5)))
     message = {}
-    message['user_id'] = fake.pyint(min_value=0, max_value=user_max_id)
+    if random.randint(1,5) != 5:   # Most of the time generate new User ID
+        user_id_store =  fake.pyint(min_value=0, max_value=user_max_id)   # Generate new User ID
+    message['user_id'] = user_id_store
     message['http_method'] = fake.http_method()
     message['client_ip'] = fake.ipv4()
 
@@ -42,7 +45,7 @@ while True:
 
     message['user_agent'] = fake.user_agent()
     if random.randint(1,100) != 100:
-        message['latency'] = random.gauss(200, 50)
+        message['latency'] = abs(random.gauss(200, 50))
     else:
         message['latency'] =  random.randint(500,5000)   # Generate outlier from time to time
 

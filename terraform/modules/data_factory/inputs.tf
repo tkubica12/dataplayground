@@ -54,10 +54,6 @@ variable "databricks_domain_id" {
   type = string
 }
 
-variable "eventhub_name" {
-  type = string
-}
-
-variable "eventhub_namespace_name" {
+variable "log_analytics_workspace_id" {
   type = string
 }

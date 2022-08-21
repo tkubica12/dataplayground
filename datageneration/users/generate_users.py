@@ -1,11 +1,15 @@
+### Generate users ###
+
 import faker
 import json
 import os
 from azure.storage.filedatalake import DataLakeFileClient, DataLakeServiceClient
+import random
 
 # Get input parameters from environment
 storageSas = os.getenv('STORAGE_SAS')
-count = int(os.getenv('COUNT', 10000))
+count = int(os.getenv('COUNT', 1000000))
+vip_count = int(os.getenv('VIP_COUNT', 10000))
 
 if not storageSas:
     print('Please provide storage connection string via USERS_SAS environmental variable')
@@ -49,5 +53,32 @@ for index in range(count):  # Generate records
 
 # Finish
 print(f'Record {index+1} of {count}')
+file.append_data(data=data, offset=offset, length=length)   # Write remaining records
+file.flush_data(offset+length)    # Commit all blocks
+
+### Generate list of VIP users ###
+
+# Create Azure Data Lake Storage file handler
+file = DataLakeFileClient(account_url=storageSas,file_system_name='users', file_path='vip.json')
+file.create_file()
+
+# Generate and write records
+offset = 0
+data = ""
+length = 0
+for index in range(vip_count):  # Generate records
+    entry = {}
+    entry['id'] = random.randint(0, count-1)
+    data = data + json.dumps(entry)+"\n"
+    length = length + len(json.dumps(entry))+1
+    if index % 1000 == 0:   # Every 1000 records, write to block
+        file.append_data(data=data, offset=offset, length=length)
+        offset = offset + length
+        data = ""
+        length = 0
+        print(f'Record {index+1} of {count}')
+
+# Finish
+print(f'VIP Record {index+1} of {count}')
 file.append_data(data=data, offset=offset, length=length)   # Write remaining records
 file.flush_data(offset+length)    # Commit all blocks
