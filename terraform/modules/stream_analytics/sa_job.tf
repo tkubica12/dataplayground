@@ -16,20 +16,42 @@ resource "azurerm_stream_analytics_job" "main" {
   }
 
   transformation_query = <<QUERY
-SELECT COUNT(*) as count, http_method, System.Timestamp() AS WindowEnd
-INTO [agg-http-method]
-FROM [pageviews]
-GROUP BY TumblingWindow(minute, 5), http_method
-
+/* Store RAW data to bronze tier */
 SELECT *
 INTO [raw-pageviews]
 FROM [pageviews]
 
 SELECT *
+INTO [raw-stars]
+FROM [stars]
+
+/* Store VIP only RAW data to bronze tier */
+SELECT L.user_id, L.http_method, L.client_ip, L.user_agent, L.latency, L.EventEnqueuedUtcTime
+INTO [raw-vip-only]
+FROM [pageviews] L
+JOIN vip R
+ON L.user_id = R.id
+
+/* Pageviews and stars correlation */
+SELECT L.user_id, L.http_method, L.client_ip, L.user_agent, L.latency, L.EventEnqueuedUtcTime, R.stars
+INTO [pageviews-stars-correlation]
+FROM [pageviews] L
+JOIN [stars] R
+ON L.user_id = R.user_id AND DATEDIFF(minute,L,R) BETWEEN 0 AND 15  
+
+/* Aggregations */
+SELECT COUNT(*) as count, http_method, System.Timestamp() AS WindowEnd
+INTO [agg-http-method]
+FROM [pageviews]
+GROUP BY TumblingWindow(minute, 5), http_method
+
+/* High latency alert */
+SELECT *
 INTO [alert-high-latency]
 FROM [pageviews]
 WHERE latency > 2000
 
+/* High latency alert enriched with user lookup */
 SELECT L.user_id, L.http_method, L.client_ip, L.user_agent, L.latency, L.EventEnqueuedUtcTime, R.name, R.city, R.street_address, R.phone_number, R.birth_number, R.user_name, R.administrative_unit, R.description
 INTO [alert-high-latency-enriched]
 FROM [pageviews] L

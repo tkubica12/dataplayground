@@ -9,7 +9,7 @@ resource "azurerm_role_assignment" "stream_analytics" {
 }
 
 resource "azurerm_eventhub_consumer_group" "pageviews" {
-  name                = "stream_analytics"
+  name                = "pageviews"
   namespace_name      = var.eventhub_namespace_name
   eventhub_name       = var.eventhub_name_pageviews
   resource_group_name = var.resource_group_name
