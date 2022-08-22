@@ -34,7 +34,7 @@ graph LR;
     class Users_generator,Products_generator,Orders_generator,Items_generator,Page_views_generator generators;
 
     classDef generators fill:#9bd9e6,stroke:#333,stroke-width:2px;
-    class Users_generator,Products_generator,Orders_generator,Items_generator,Page_views_generator generators;
+    class Users_generator,Products_generator,Orders_generator,Items_generator,Pageviews_generator,Stars_generator generators;
 
     style Data_Lake_Bronze fill:#b45f06,stroke:#333,stroke-width:2px
     style Data_Lake_Silver fill:#eeeeee,stroke:#333,stroke-width:2px
