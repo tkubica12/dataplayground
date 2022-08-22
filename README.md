@@ -54,7 +54,7 @@ Data generation module deploys following resources together with containers resp
 Data sources:
 - Users (JSON lines single flat file) in Azure Storage Data Lake gen2
 - Products (JSON file per product) in Azure Storage Data Lake gen2
-- Page views (data stream) streamed via Azure Event Hub
+- Page views (data stream) and stars (another stream) streamed via Azure Event Hub
 - Orders (relational tables) stored as orders and items tables in Azure SQL
 
 See [datageneration](datageneration/datageneration.md) for more details.
@@ -72,15 +72,20 @@ This part contains consolidation of data sources into bronze tier and potentialy
     - order and items as Parquet files in Data Lake gen2 (sink)
   - Pipelines
     - Copy operation triggered every hour from SQL tables to Data Lake followed by Databricks job to process orders, items, pageviews, products and users fro bronze tier to Delta tables in Silver tier
-- Stream Analytics getting pageviews stream to bronze tier as Parquet files
-- Event Hub data capture to bronze tier as Avro files
+- Stream Analytics getting raw pageviews and stars stream to bronze tier as Parquet files
 - Databricks processing orchestrated by Data Factory
   - Two clusters - single node and serverless
   - Notebook to get data from bronze tier and create Delta tables in silver tier
   - Data movement from SQL do bronze tier and coordinated run of Databricks notebook is orchestrated via Data Factory pipeline
   
-## Data analysis (all TBD)
-- Stream Analytics enriching pageviews data with customer information
-- Azure Databricks advanced processing, visualization and ML
-- PowerBI dashboard to visualize data (+ using Synapse or Databricks serverless to read Delta from data lake)
-- AzureML training model using data processed by Databricks
+## Data analysis
+- Stream Analytics
+  - Alert on high latency requests
+  - Enriching pageviews data with customer information for high latency requests
+  - Aggregating pageviews by HTTP method in 5 minutes window
+  - TBD: alerting on VIP users access (by looking up vip.json)
+  - TBD: correlating two streams alerting on pageviews of user who gave <3 stars withing 10 minutes period
+- TBD: Structured Streaming using Azure Databricks (implement the same functionality as above using different tool)
+- TBD: Azure Databricks advanced processing, visualization and ML
+- TBD: PowerBI dashboard to visualize data (+ using Synapse or Databricks serverless to read Delta from data lake)
+- TBD: AzureML training model using data processed by Databricks

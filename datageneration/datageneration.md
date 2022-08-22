@@ -2,7 +2,7 @@
 As part of demo I am going to generate different types of data:
 - Users is JSON lines flat file with user details and contains one array attribute (list of jobs) pushed to Data Lake
 - Products are many JSON files, one for each product pushed to Data Lake
-- Page views are referencing user ID and streamed one record per second to Event Hub
+- Pageviews and stars are pushed to respective Event Hubs
 - Orders stored in two relational tables in Azure SQL:
   - Order table consisting of orderId, userId, orderDate and orderValue
   - Items table consisting of orderId, rowId and productId 
