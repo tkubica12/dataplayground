@@ -38,10 +38,11 @@ python generate_users.py
 export COUNT=100
 python generate_products.py
 
-# Stream pageviews
+# Stream pageviews adn stars
 export EVENTHUB_NAMESPACE="myeventhubnamespace"
-export EVENTHUB_CONNECTION_STRING=$(az eventhubs eventhub authorization-rule keys list -g datademo --namespace-name $EVENTHUB_NAMESPACE --eventhub-name pageviews -n pageviewsSender --query primaryConnectionString -o tsv)
-python stream_pageviews.py
+export EVENTHUB_CONNECTION_STRING_PAGEVIEWS=$(az eventhubs eventhub authorization-rule keys list -g data-demo --namespace-name $EVENTHUB_NAMESPACE --eventhub-name pageviews -n pageviewsSender --query primaryConnectionString -o tsv)
+export EVENTHUB_CONNECTION_STRING_STARS=$(az eventhubs eventhub authorization-rule keys list -g data-demo --namespace-name $EVENTHUB_NAMESPACE --eventhub-name stars -n starsSender --query primaryConnectionString -o tsv)
+python stream.py
 
 # Generate orders
 export SQL_SERVER="tkwngxfscwrl.database.windows.net"
@@ -66,7 +67,7 @@ docker push ghcr.io/tkubica12/generate_orders:latest
 # Running containers locally
 docker run -it --rm -e STORAGE_SAS=$STORAGE_SAS -e COUNT=100 -e VIP_COUNT=10 ghcr.io/tkubica12/generate_users:latest
 docker run -it --rm -e STORAGE_SAS=$STORAGE_SAS -e COUNT=100 ghcr.io/tkubica12/generate_users:latest
-docker run -it --rm -e EVENTHUB_CONNECTION_STRING=$EVENTHUB_CONNECTION_STRING -e EVENTHUB_NAMESPACE=$EVENTHUB_NAMESPACE ghcr.io/tkubica12/stream_pageviews:latest
+docker run -it --rm -e EVENTHUB_CONNECTION_STRING_PAGEVIEWS=$EVENTHUB_CONNECTION_STRING_PAGEVIEWS -e EVENTHUB_CONNECTION_STRING_STARS=$EVENTHUB_CONNECTION_STRING_STARS -e EVENTHUB_NAMESPACE=$EVENTHUB_NAMESPACE ghcr.io/tkubica12/stream_pageviews:latest
 docker run --rm -it -e SQL_SERVER=$SQL_SERVER \
     -e SQL_DATABASE=$SQL_DATABASE \
     -e SQL_USER=$SQL_USER \

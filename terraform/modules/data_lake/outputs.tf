@@ -18,6 +18,10 @@ output "eventhub_namespace_name" {
   value = azurerm_eventhub_namespace.main.name
 }
 
-output "eventhub_name" {
+output "eventhub_name_pageviews" {
   value = azurerm_eventhub.pageviews.name
+}
+
+output "eventhub_name_stars" {
+  value = azurerm_eventhub.stars.name
 }

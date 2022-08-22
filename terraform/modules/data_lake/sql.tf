@@ -42,9 +42,9 @@ resource "azurerm_mssql_database" "orders" {
   server_id                   = azurerm_mssql_server.main.id
   collation                   = "SQL_Latin1_General_CP1_CI_AS"
   auto_pause_delay_in_minutes = 60
-  max_size_gb                 = 1024
+  max_size_gb                 = 500
   read_scale                  = false
-  sku_name                    = "GP_S_Gen5_2"
+  sku_name                    = "GP_S_Gen5_1"
   min_capacity                = 0.5
   zone_redundant              = false
   storage_account_type        = "Local"

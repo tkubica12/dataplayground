@@ -33,4 +33,4 @@ COPY . /venv
 # When image is run, run the code with the environment
 # activated:
 SHELL ["/bin/bash", "-c"]
-ENTRYPOINT source /venv/bin/activate && python /venv/stream_pageviews.py
+ENTRYPOINT source /venv/bin/activate && python /venv/stream.py

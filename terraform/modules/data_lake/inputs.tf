@@ -20,6 +20,11 @@ variable "users_count" {
   default = 1000000
 }
   
+variable "vip_users_count" {
+  type    = number
+  default = 10000
+}
+  
 variable "products_count" {
   type    = number
   default = 100000

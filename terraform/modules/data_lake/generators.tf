@@ -16,6 +16,7 @@ resource "azurerm_container_group" "generate_users" {
 
     environment_variables = {
       "COUNT" = tostring(var.users_count)
+      "VIP_COUNT" = tostring(var.vip_users_count)
     }
 
     secure_environment_variables = {
@@ -49,7 +50,7 @@ resource "azurerm_container_group" "generate_products" {
 }
 
 resource "azurerm_container_group" "stream_pageviews" {
-  name                = "streampageviews"
+  name                = "stream"
   location            = var.location
   resource_group_name = var.resource_group_name
   ip_address_type     = "None"
@@ -68,7 +69,8 @@ resource "azurerm_container_group" "stream_pageviews" {
     }
 
     secure_environment_variables = {
-      "EVENTHUB_CONNECTION_STRING" = azurerm_eventhub_authorization_rule.pageviewsSender.primary_connection_string
+      "EVENTHUB_CONNECTION_STRING_PAGEVIEWS" = azurerm_eventhub_authorization_rule.pageviewsSender.primary_connection_string
+      "EVENTHUB_CONNECTION_STRING_STARS" = azurerm_eventhub_authorization_rule.starsSender.primary_connection_string
     }
   }
 }

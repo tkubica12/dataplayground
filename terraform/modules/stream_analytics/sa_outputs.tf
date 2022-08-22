@@ -1,5 +1,5 @@
 // Storage connection
-resource "azurerm_stream_analytics_output_blob" "storage" {
+resource "azurerm_stream_analytics_output_blob" "raw_pageviews" {
   name                      = "raw-pageviews"
   stream_analytics_job_name = azurerm_stream_analytics_job.main.name
   resource_group_name       = var.resource_group_name

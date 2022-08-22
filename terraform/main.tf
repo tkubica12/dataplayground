@@ -21,6 +21,7 @@ module "data_lake" {
   location            = azurerm_resource_group.main.location
   keyvault_id         = azurerm_key_vault.main.id
   users_count         = 5000000
+  vip_users_count     = 50000
   products_count      = 100000
   orders_count        = 100000000
 
@@ -72,7 +73,8 @@ module "stream_analytics" {
   datalake_url               = module.data_lake.datalake_url
   datalake_name              = module.data_lake.datalake_name
   datalake_id                = module.data_lake.datalake_id
-  eventhub_name              = module.data_lake.eventhub_name
+  eventhub_name_pageviews    = module.data_lake.eventhub_name_pageviews
+  eventhub_name_stars        = module.data_lake.eventhub_name_stars
   eventhub_namespace_name    = module.data_lake.eventhub_namespace_name
   log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
 }
