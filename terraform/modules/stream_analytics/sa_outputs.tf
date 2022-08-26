@@ -5,7 +5,7 @@ resource "azurerm_stream_analytics_output_blob" "raw_pageviews" {
   resource_group_name       = var.resource_group_name
   storage_account_name      = var.datalake_name
   storage_container_name    = "bronze"
-  path_pattern              = "pageviews_from_streamanalytics/year={datetime:yyyy}/month={datetime:MM}/day={datetime:dd}"
+  path_pattern              = "streamanalytics/pageviews/year={datetime:yyyy}/month={datetime:MM}/day={datetime:dd}"
   date_format               = "yyyy-MM-dd"
   time_format               = "HH"
   batch_min_rows            = 20
@@ -23,7 +23,7 @@ resource "azurerm_stream_analytics_output_blob" "raw_stars" {
   resource_group_name       = var.resource_group_name
   storage_account_name      = var.datalake_name
   storage_container_name    = "bronze"
-  path_pattern              = "stars_from_streamanalytics/year={datetime:yyyy}/month={datetime:MM}/day={datetime:dd}"
+  path_pattern              = "streamanalytics/stars/year={datetime:yyyy}/month={datetime:MM}/day={datetime:dd}"
   date_format               = "yyyy-MM-dd"
   time_format               = "HH"
   batch_min_rows            = 20
@@ -41,7 +41,7 @@ resource "azurerm_stream_analytics_output_blob" "raw_vip_only" {
   resource_group_name       = var.resource_group_name
   storage_account_name      = var.datalake_name
   storage_container_name    = "bronze"
-  path_pattern              = "vip_only_from_streamanalytics/year={datetime:yyyy}/month={datetime:MM}/day={datetime:dd}"
+  path_pattern              = "streamanalytics/vip_only/year={datetime:yyyy}/month={datetime:MM}/day={datetime:dd}"
   date_format               = "yyyy-MM-dd"
   time_format               = "HH"
   batch_min_rows            = 20
@@ -59,7 +59,7 @@ resource "azurerm_stream_analytics_output_blob" "pageviews_stars_correlation" {
   resource_group_name       = var.resource_group_name
   storage_account_name      = var.datalake_name
   storage_container_name    = "silver"
-  path_pattern              = "pageviews_stars_correlation_from_streamanalytics/year={datetime:yyyy}/month={datetime:MM}/day={datetime:dd}"
+  path_pattern              = "streamanalytics/pageviews_stars_correlation/year={datetime:yyyy}/month={datetime:MM}/day={datetime:dd}"
   date_format               = "yyyy-MM-dd"
   time_format               = "HH"
   batch_min_rows            = 20
@@ -77,7 +77,7 @@ resource "azurerm_stream_analytics_output_blob" "agg_http_method" {
   resource_group_name       = var.resource_group_name
   storage_account_name      = var.datalake_name
   storage_container_name    = "silver"
-  path_pattern              = "pageviews_by_http_method/year={datetime:yyyy}/month={datetime:MM}/day={datetime:dd}"
+  path_pattern              = "streamanalytics/pageviews_by_http_method/year={datetime:yyyy}/month={datetime:MM}/day={datetime:dd}"
   date_format               = "yyyy-MM-dd"
   time_format               = "HH"
   batch_min_rows            = 20
@@ -97,7 +97,7 @@ resource "azurerm_stream_analytics_output_blob" "alert_high_latency" {
   resource_group_name       = var.resource_group_name
   storage_account_name      = var.datalake_name
   storage_container_name    = "silver"
-  path_pattern              = "pageviews_high_latency/year={datetime:yyyy}/month={datetime:MM}/day={datetime:dd}"
+  path_pattern              = "streamanalytics/pageviews_high_latency/year={datetime:yyyy}/month={datetime:MM}/day={datetime:dd}"
   date_format               = "yyyy-MM-dd"
   time_format               = "HH"
   batch_min_rows            = 20
@@ -117,7 +117,7 @@ resource "azurerm_stream_analytics_output_blob" "alert_high_latency_enriched" {
   resource_group_name       = var.resource_group_name
   storage_account_name      = var.datalake_name
   storage_container_name    = "silver"
-  path_pattern              = "pageviews_high_latency_enriched/year={datetime:yyyy}/month={datetime:MM}/day={datetime:dd}"
+  path_pattern              = "streamanalytics/pageviews_high_latency_enriched/year={datetime:yyyy}/month={datetime:MM}/day={datetime:dd}"
   date_format               = "yyyy-MM-dd"
   time_format               = "HH"
   batch_min_rows            = 20

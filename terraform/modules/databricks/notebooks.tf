@@ -7,45 +7,48 @@ locals {
 
 -- COMMAND ----------
 
-CREATE DATABASE IF NOT EXISTS mojedb;
+USE CATALOG mycatalog;
 
 -- COMMAND ----------
 
-CREATE OR REPLACE TABLE mojedb.items
+CREATE OR REPLACE TABLE mydb.products
 USING delta
-LOCATION 'abfss://silver@${var.storage_account_name}.dfs.core.windows.net/itemsDeltaTable'
-SELECT * FROM PARQUET.`abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/items/fromDataFactory.parquet`;
-
--- COMMAND ----------
-
-CREATE OR REPLACE TABLE mojedb.orders
-USING delta
-LOCATION 'abfss://silver@${var.storage_account_name}.dfs.core.windows.net/ordersDeltaTable'
-SELECT * FROM PARQUET.`abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/orders/fromDataFactory.parquet`;
-
--- COMMAND ----------
-
-CREATE OR REPLACE TABLE mojedb.users
-USING delta
-LOCATION 'abfss://silver@${var.storage_account_name}.dfs.core.windows.net/usersDeltaTable'
-SELECT * FROM JSON.`abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/users/users.json`;
-
--- COMMAND ----------
-
-CREATE OR REPLACE TABLE mojedb.products
-USING delta
-LOCATION 'abfss://silver@${var.storage_account_name}.dfs.core.windows.net/productsDeltaTable'
 SELECT * FROM JSON.`abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/products/`;
 
--- COMMAND ----------
+GRANT ALL PRIVILEGES ON mydb.products TO `account users`;
 
-CREATE OR REPLACE TABLE mojedb.pageviews
+-- COMMAND ----------
+CREATE OR REPLACE TABLE mydb.vipusers
 USING delta
-LOCATION 'abfss://silver@${var.storage_account_name}.dfs.core.windows.net/pageviewsDeltaTable'
-SELECT * FROM AVRO.`abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/pageviews_from_capture/**/**/**/**/**/**/**/**`;
+SELECT * FROM JSON.`abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/users/vip.json`;
+
+GRANT ALL PRIVILEGES ON mydb.vipusers TO `account users`;
 
 -- COMMAND ----------
 
+CREATE OR REPLACE TABLE mydb.users
+USING delta
+SELECT * FROM JSON.`abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/users/users.json`;
+
+GRANT ALL PRIVILEGES ON mydb.users TO `account users`;
+
+-- COMMAND ----------
+
+CREATE OR REPLACE TABLE mydb.orders
+USING delta
+SELECT * FROM PARQUET.`abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/orders/fromDataFactory.parquet`;
+
+GRANT ALL PRIVILEGES ON mydb.orders TO `account users`;
+
+-- COMMAND ----------
+
+CREATE OR REPLACE TABLE mydb.items
+USING delta
+SELECT * FROM PARQUET.`abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/items/fromDataFactory.parquet`;
+
+GRANT ALL PRIVILEGES ON mydb.items TO `account users`;
+
+-- COMMAND ----------
 CONTENT
 }
 
@@ -71,23 +74,27 @@ locals {
 
 -- COMMAND ----------
 
-SELECT * FROM mojedb.orders LIMIT 10
+USE CATALOG mycatalog;
 
 -- COMMAND ----------
 
-SELECT * FROM mojedb.items LIMIT 10
+SELECT * FROM mydb.orders LIMIT 10
 
 -- COMMAND ----------
 
-SELECT * FROM mojedb.users LIMIT 10
+SELECT * FROM mydb.items LIMIT 10
 
 -- COMMAND ----------
 
-SELECT * FROM mojedb.products LIMIT 10
+SELECT * FROM mydb.users LIMIT 10
 
 -- COMMAND ----------
 
-SELECT * FROM mojedb.pageviews LIMIT 10
+SELECT * FROM mydb.products LIMIT 10
+
+-- COMMAND ----------
+
+SELECT * FROM mydb.pageviews LIMIT 10
 
 -- COMMAND ----------
 
@@ -97,7 +104,7 @@ SELECT * FROM mojedb.pageviews LIMIT 10
 -- COMMAND ----------
 
 SELECT count(*) as numberOfOrders, sum(orderValue) as sumValue 
-FROM mojedb.orders 
+FROM mydb.orders 
 GROUP BY userId
 ORDER BY numberOfOrders desc
 

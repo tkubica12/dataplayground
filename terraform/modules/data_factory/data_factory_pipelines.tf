@@ -135,11 +135,27 @@ JSON
 
 }
 
+// Run every few hours
 resource "azurerm_data_factory_trigger_schedule" "trigger" {
   name            = "trigger"
   data_factory_id = azurerm_data_factory.main.id
   pipeline_name   = azurerm_data_factory_pipeline.process_data.name
 
-  interval  = 2
-  frequency = "Hour"
+  interval  = 30
+  frequency = "Minute"
 }
+
+# // Run when users are generated
+# resource "azurerm_data_factory_trigger_blob_event" "users" {
+#   name                = "user_ready"
+#   data_factory_id     = azurerm_data_factory.main.id
+#   storage_account_id  = var.datalake_id
+#   events              = ["Microsoft.Storage.BlobCreated"]
+#   blob_path_ends_with = "users.json"
+#   ignore_empty_blobs  = true
+#   activated           = true
+
+#   pipeline {
+#     name = azurerm_data_factory_pipeline.process_data.name
+#   }
+# }

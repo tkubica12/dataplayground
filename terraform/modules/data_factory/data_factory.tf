@@ -71,7 +71,7 @@ resource "azapi_resource" "databricks_df_access" {
 }
 
 resource "azurerm_monitor_diagnostic_setting" "main" {
-  name                           = "data_factory"
+  name                           = var.name_prefix
   target_resource_id             = azurerm_data_factory.main.id
   log_analytics_workspace_id     = var.log_analytics_workspace_id
   log_analytics_destination_type = "Dedicated"

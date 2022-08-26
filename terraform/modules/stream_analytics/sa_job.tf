@@ -73,7 +73,7 @@ QUERY
 # }
 
 resource "azurerm_monitor_diagnostic_setting" "main" {
-  name                       = "stream_analytics"
+  name                       = var.name_prefix
   target_resource_id         = azurerm_stream_analytics_job.main.id
   log_analytics_workspace_id = var.log_analytics_workspace_id
 

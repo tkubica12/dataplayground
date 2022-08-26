@@ -21,7 +21,7 @@ resource "azurerm_eventhub" "pageviews" {
       storage_account_id = azurerm_storage_account.main.id
       blob_container_name = azurerm_storage_container.bronze.name
       name = "EventHubArchive.AzureBlockBlob"
-      archive_name_format = "pageviews_from_capture/{Namespace}/{EventHub}/{PartitionId}/{Year}/{Month}/{Day}/{Hour}/{Minute}/{Second}"
+      archive_name_format = "eventuhub_capture/pageviews/{Namespace}/{EventHub}/{PartitionId}/{Year}/{Month}/{Day}/{Hour}/{Minute}/{Second}"
     }
   }
 }
@@ -41,7 +41,7 @@ resource "azurerm_eventhub" "stars" {
       storage_account_id = azurerm_storage_account.main.id
       blob_container_name = azurerm_storage_container.bronze.name
       name = "EventHubArchive.AzureBlockBlob"
-      archive_name_format = "stars_from_capture/{Namespace}/{EventHub}/{PartitionId}/{Year}/{Month}/{Day}/{Hour}/{Minute}/{Second}"
+      archive_name_format = "eventuhub_capture/stars/{Namespace}/{EventHub}/{PartitionId}/{Year}/{Month}/{Day}/{Hour}/{Minute}/{Second}"
     }
   }
 }

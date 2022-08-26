@@ -20,10 +20,10 @@ module "data_lake" {
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
   keyvault_id         = azurerm_key_vault.main.id
-  users_count         = 5000000
+  users_count         = 100000
   vip_users_count     = 50000
-  products_count      = 100000
-  orders_count        = 100000000
+  products_count      = 10000
+  orders_count        = 100000
 
   depends_on = [
     azurerm_role_assignment.currentuser-kv
@@ -44,7 +44,7 @@ module "data_factory" {
   kv-reader_id               = azurerm_user_assigned_identity.kv-reader.id
   storage-writer_id          = module.data_lake.storage-writer_id
   databricks_df_access_id    = module.databricks.databricks_df_access_id
-  databricks_cluster_id      = module.databricks.databricks_cluster_id
+  databricks_cluster_id      = module.databricks.databricks_etl_cluster_id
   databricks_domain_id       = module.databricks.databricks_domain_id
   databricks_resource_id     = module.databricks.databricks_resource_id
   log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
@@ -59,6 +59,7 @@ module "databricks" {
   source                      = "./modules/databricks"
   name_prefix                 = random_string.random.result
   resource_group_name         = azurerm_resource_group.main.name
+  resource_group_id           = azurerm_resource_group.main.id
   location                    = azurerm_resource_group.main.location
   storage_account_name        = module.data_lake.datalake_name
   storage_resource_group_name = azurerm_resource_group.main.name
