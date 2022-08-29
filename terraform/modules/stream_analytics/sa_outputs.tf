@@ -131,3 +131,23 @@ resource "azurerm_stream_analytics_output_blob" "alert_high_latency_enriched" {
   }
 }
 
+resource "azurerm_stream_analytics_output_blob" "first_event_in_user_sequence" {
+  name                      = "first-event-in-user-sequence"
+  stream_analytics_job_name = azurerm_stream_analytics_job.main.name
+  resource_group_name       = var.resource_group_name
+  storage_account_name      = var.datalake_name
+  storage_container_name    = "silver"
+  path_pattern              = "streamanalytics/first_event_in_user_sequence/year={datetime:yyyy}/month={datetime:MM}/day={datetime:dd}"
+  date_format               = "yyyy-MM-dd"
+  time_format               = "HH"
+  batch_min_rows            = 20
+  batch_max_wait_time       = "00:00:01"
+  authentication_mode       = "Msi"
+
+  serialization {
+    type     = "Json"
+    encoding = "UTF8"
+    format   = "LineSeparated"
+  }
+}
+

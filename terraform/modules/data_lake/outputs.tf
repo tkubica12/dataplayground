@@ -25,3 +25,11 @@ output "eventhub_name_pageviews" {
 output "eventhub_name_stars" {
   value = azurerm_eventhub.stars.name
 }
+
+output "eventhub_id_pageviews" {
+  value = azurerm_eventhub.pageviews.id
+}
+
+output "eventhub_id_stars" {
+  value = azurerm_eventhub.stars.id
+}

@@ -49,6 +49,22 @@ SELECT * FROM PARQUET.`abfss://bronze@${var.storage_account_name}.dfs.core.windo
 GRANT ALL PRIVILEGES ON mydb.items TO `account users`;
 
 -- COMMAND ----------
+
+CREATE OR REPLACE TABLE mydb.pageviews
+USING delta
+SELECT * FROM PARQUET.`abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/streamanalytics/pageviews/`;
+
+GRANT ALL PRIVILEGES ON mydb.pageviews TO `account users`;
+
+-- COMMAND ----------
+
+CREATE OR REPLACE TABLE mydb.stars
+USING delta
+SELECT * FROM PARQUET.`abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/streamanalytics/stars/`;
+
+GRANT ALL PRIVILEGES ON mydb.stars TO `account users`;
+
+-- COMMAND ----------
 CONTENT
 }
 
@@ -95,6 +111,10 @@ SELECT * FROM mydb.products LIMIT 10
 -- COMMAND ----------
 
 SELECT * FROM mydb.pageviews LIMIT 10
+
+-- COMMAND ----------
+
+SELECT * FROM mydb.stars LIMIT 10
 
 -- COMMAND ----------
 

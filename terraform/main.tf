@@ -74,6 +74,8 @@ module "stream_analytics" {
   datalake_url               = module.data_lake.datalake_url
   datalake_name              = module.data_lake.datalake_name
   datalake_id                = module.data_lake.datalake_id
+  eventhub_id_pageviews      = module.data_lake.eventhub_id_pageviews
+  eventhub_id_stars          = module.data_lake.eventhub_id_stars
   eventhub_name_pageviews    = module.data_lake.eventhub_name_pageviews
   eventhub_name_stars        = module.data_lake.eventhub_name_stars
   eventhub_namespace_name    = module.data_lake.eventhub_namespace_name

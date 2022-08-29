@@ -26,14 +26,14 @@ INTO [raw-stars]
 FROM [stars]
 
 /* Store VIP only RAW data to bronze tier */
-SELECT L.user_id, L.http_method, L.client_ip, L.user_agent, L.latency, L.EventEnqueuedUtcTime
+SELECT L.user_id, L.http_method, L.client_ip, L.user_agent, L.latency, L.EventEnqueuedUtcTime, L.uri
 INTO [raw-vip-only]
 FROM [pageviews] L
 JOIN vip R
 ON L.user_id = R.id
 
 /* Pageviews and stars correlation */
-SELECT L.user_id, L.http_method, L.client_ip, L.user_agent, L.latency, L.EventEnqueuedUtcTime, R.stars
+SELECT L.user_id, L.http_method, L.client_ip, L.user_agent, L.latency, L.EventEnqueuedUtcTime, L.uri, R.stars
 INTO [pageviews-stars-correlation]
 FROM [pageviews] L
 JOIN [stars] R
@@ -52,12 +52,18 @@ FROM [pageviews]
 WHERE latency > 2000
 
 /* High latency alert enriched with user lookup */
-SELECT L.user_id, L.http_method, L.client_ip, L.user_agent, L.latency, L.EventEnqueuedUtcTime, R.name, R.city, R.street_address, R.phone_number, R.birth_number, R.user_name, R.administrative_unit, R.description
+SELECT L.user_id, L.http_method, L.client_ip, L.user_agent, L.latency, L.EventEnqueuedUtcTime, L.uri, R.name, R.city, R.street_address, R.phone_number, R.birth_number, R.user_name, R.administrative_unit, R.description
 INTO [alert-high-latency-enriched]
 FROM [pageviews] L
 JOIN users R
 ON L.user_id = R.id
 WHERE L.latency > 2000
+
+/* Detect first event by user over last 60 minutes */
+SELECT user_id, client_ip, uri
+INTO [first-event-in-user-sequence]
+FROM [pageviews]
+WHERE ISFIRST(mi, 60) OVER (PARTITION BY user_id) = 1
 QUERY
 }
 

@@ -141,7 +141,7 @@ resource "azurerm_data_factory_trigger_schedule" "trigger" {
   data_factory_id = azurerm_data_factory.main.id
   pipeline_name   = azurerm_data_factory_pipeline.process_data.name
 
-  interval  = 30
+  interval  = 45
   frequency = "Minute"
 }
 

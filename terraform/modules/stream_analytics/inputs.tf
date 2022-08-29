@@ -22,6 +22,14 @@ variable "datalake_id" {
   type = string
 }
 
+variable "eventhub_id_pageviews" {
+  type = string
+}
+
+variable "eventhub_id_stars" {
+  type = string
+}
+
 variable "eventhub_name_pageviews" {
   type = string
 }
