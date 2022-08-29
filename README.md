@@ -75,7 +75,7 @@ This part contains consolidation of data sources into bronze tier and potentialy
 - Stream Analytics getting raw pageviews and stars stream to bronze tier as Parquet files
 - Databricks processing orchestrated by Data Factory
   - Two clusters - single node and serverless
-  - Notebook to get data from bronze tier and create Delta tables in silver tier
+  - Notebook to get data from bronze tier and create Delta tables in silver tier using managed tables in Unity Catalog
   - Data movement from SQL do bronze tier and coordinated run of Databricks notebook is orchestrated via Data Factory pipeline
   
 ## Data analysis
@@ -83,8 +83,8 @@ This part contains consolidation of data sources into bronze tier and potentialy
   - Alert on high latency requests
   - Enriching pageviews data with customer information for high latency requests
   - Aggregating pageviews by HTTP method in 5 minutes window
-  - TBD: alerting on VIP users access (by looking up vip.json)
-  - TBD: correlating two streams alerting on pageviews of user who gave <3 stars withing 10 minutes period
+  - Alerting on VIP users access (by looking up vip.json)
+  - Correlating two streams (pageviews of users who also gave star over last 15 minutes)
 - TBD: Structured Streaming using Azure Databricks (implement the same functionality as above using different tool)
 - TBD: Azure Databricks advanced processing, visualization and ML
 - TBD: PowerBI dashboard to visualize data (+ using Synapse or Databricks serverless to read Delta from data lake)
