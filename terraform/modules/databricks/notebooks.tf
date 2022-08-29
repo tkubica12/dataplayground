@@ -11,58 +11,45 @@ USE CATALOG mycatalog;
 
 -- COMMAND ----------
 
-CREATE OR REPLACE TABLE mydb.products
-USING delta
-SELECT * FROM JSON.`abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/products/`;
-
-GRANT ALL PRIVILEGES ON mydb.products TO `account users`;
-
--- COMMAND ----------
-CREATE OR REPLACE TABLE mydb.vipusers
-USING delta
-SELECT * FROM JSON.`abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/users/vip.json`;
-
-GRANT ALL PRIVILEGES ON mydb.vipusers TO `account users`;
+COPY INTO mydb.products
+FROM 'abfss://bronze@gwecyjbnxwgk.dfs.core.windows.net/products/'
+FILEFORMAT = JSON;
 
 -- COMMAND ----------
 
-CREATE OR REPLACE TABLE mydb.users
-USING delta
-SELECT * FROM JSON.`abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/users/users.json`;
-
-GRANT ALL PRIVILEGES ON mydb.users TO `account users`;
+COPY INTO mydb.vipusers
+FROM 'abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/users/vip.json'
+FILEFORMAT = JSON;
 
 -- COMMAND ----------
 
-CREATE OR REPLACE TABLE mydb.orders
-USING delta
-SELECT * FROM PARQUET.`abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/orders/fromDataFactory.parquet`;
-
-GRANT ALL PRIVILEGES ON mydb.orders TO `account users`;
+COPY INTO mydb.users
+FROM 'abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/users/users.json'
+FILEFORMAT = JSON;
 
 -- COMMAND ----------
 
-CREATE OR REPLACE TABLE mydb.items
-USING delta
-SELECT * FROM PARQUET.`abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/items/fromDataFactory.parquet`;
-
-GRANT ALL PRIVILEGES ON mydb.items TO `account users`;
+COPY INTO mydb.orders
+FROM 'abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/orders/fromDataFactory.parquet'
+FILEFORMAT = PARQUET;
 
 -- COMMAND ----------
 
-CREATE OR REPLACE TABLE mydb.pageviews
-USING delta
-SELECT * FROM PARQUET.`abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/streamanalytics/pageviews/`;
-
-GRANT ALL PRIVILEGES ON mydb.pageviews TO `account users`;
+COPY INTO mydb.items
+FROM 'abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/items/fromDataFactory.parquet'
+FILEFORMAT = PARQUET;
 
 -- COMMAND ----------
 
-CREATE OR REPLACE TABLE mydb.stars
-USING delta
-SELECT * FROM PARQUET.`abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/streamanalytics/stars/`;
+COPY INTO mydb.pageviews
+FROM 'abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/streamanalytics/pageviews/'
+FILEFORMAT = PARQUET;
 
-GRANT ALL PRIVILEGES ON mydb.stars TO `account users`;
+-- COMMAND ----------
+
+COPY INTO mydb.stars
+FROM 'abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/streamanalytics/stars/'
+FILEFORMAT = PARQUET;
 
 -- COMMAND ----------
 CONTENT
