@@ -80,6 +80,14 @@ resource "databricks_cluster" "etl_cluster" {
   ]
 }
 
+# resource "databricks_library" "user_cluster" {
+#   cluster_id = databricks_cluster.user_cluster.id
+#   maven {
+#     coordinates = "com.microsoft.azure:azure-eventhubs-spark_2.11:2.3.17"
+#   }
+# }
+
+
 // Identity for Data Factory access
 resource "azurerm_user_assigned_identity" "databricks_df_access" {
   name                = "databricks_df_access"

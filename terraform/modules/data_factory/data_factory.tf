@@ -185,7 +185,7 @@ resource "azurerm_monitor_diagnostic_setting" "main" {
       days    = 0
     }
   }
-  
+
   metric {
     category = "AllMetrics"
     enabled  = false

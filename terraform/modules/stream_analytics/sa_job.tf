@@ -17,7 +17,7 @@ resource "azurerm_stream_analytics_job" "main" {
 
   transformation_query = <<QUERY
 /* Store RAW data to bronze tier */
-SELECT *
+SELECT user_id, http_method, uri, client_ip, user_agent, CAST(latency as float) AS latency, EventProcessedUtcTime, PartitionId, EventEnqueuedUtcTime
 INTO [raw-pageviews]
 FROM [pageviews]
 
