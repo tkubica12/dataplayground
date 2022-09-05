@@ -76,6 +76,7 @@ This part contains consolidation of data sources into bronze tier and potentialy
 - Databricks processing orchestrated by Data Factory
   - Two clusters - single node and serverless
   - Notebook to get data from bronze tier and create Delta tables in silver tier using managed tables in Unity Catalog
+  - All access to storage (load from bronze tier and store for managed tables) is authenticated via managed identity (no passwords or keys)
   - Data movement from SQL do bronze tier and coordinated run of Databricks notebook is orchestrated via Data Factory pipeline
   
 ## Data analysis
