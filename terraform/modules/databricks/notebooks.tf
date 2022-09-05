@@ -12,43 +12,57 @@ USE CATALOG mycatalog;
 -- COMMAND ----------
 
 COPY INTO mydb.products
-FROM 'abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/products/'
+FROM 'abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/products/'  WITH (
+  CREDENTIAL `mi_credential`
+)
 FILEFORMAT = JSON;
 
 -- COMMAND ----------
 
 COPY INTO mydb.vipusers
-FROM 'abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/users/vip.json'
+FROM 'abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/users/vip.json'  WITH (
+  CREDENTIAL `mi_credential`
+)
 FILEFORMAT = JSON;
 
 -- COMMAND ----------
 
 COPY INTO mydb.users
-FROM 'abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/users/users.json'
+FROM 'abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/users/users.json'  WITH (
+  CREDENTIAL `mi_credential`
+)
 FILEFORMAT = JSON;
 
 -- COMMAND ----------
 
 COPY INTO mydb.orders
-FROM 'abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/orders/fromDataFactory.parquet'
+FROM 'abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/orders/fromDataFactory.parquet'  WITH (
+  CREDENTIAL `mi_credential`
+)
 FILEFORMAT = PARQUET;
 
 -- COMMAND ----------
 
 COPY INTO mydb.items
-FROM 'abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/items/fromDataFactory.parquet'
+FROM 'abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/items/fromDataFactory.parquet'  WITH (
+  CREDENTIAL `mi_credential`
+)
 FILEFORMAT = PARQUET;
 
 -- COMMAND ----------
 
 COPY INTO mydb.pageviews
-FROM 'abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/streamanalytics/pageviews/'
+FROM 'abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/streamanalytics/pageviews/'  WITH (
+  CREDENTIAL `mi_credential`
+)
 FILEFORMAT = PARQUET;
 
 -- COMMAND ----------
 
 COPY INTO mydb.stars
-FROM 'abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/streamanalytics/stars/'
+FROM 'abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/streamanalytics/stars/'  WITH (
+  CREDENTIAL `mi_credential`
+)
 FILEFORMAT = PARQUET;
 
 -- COMMAND ----------

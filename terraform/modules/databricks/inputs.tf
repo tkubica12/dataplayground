@@ -22,6 +22,8 @@ variable "storage_resource_group_name" {
   type = string
 }
 
-# variable "storage_sas_databricks" {
-#   type = string
-# }
+variable "node_sku" {
+  type = string
+  default = "Standard_D4s_v5"
+}
+
