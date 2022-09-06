@@ -1,5 +1,23 @@
+// Storage SAS for generators
+data "azurerm_storage_account_blob_container_sas" "storage_sas_bronze" {
+  connection_string = azurerm_storage_account.main.primary_connection_string
+  container_name    = azurerm_storage_container.bronze.name
+  https_only        = true
 
+  start  = "2018-03-21"
+  expiry = "2200-03-21"
 
+  permissions {
+    read   = true
+    add    = true
+    create = true
+    write  = true
+    delete = true
+    list   = true
+  }
+}
+
+// Generators with output to storage
 resource "azurerm_container_group" "generate_users" {
   name                = "generateusers"
   location            = var.location
@@ -49,6 +67,27 @@ resource "azurerm_container_group" "generate_products" {
   }
 }
 
+// Authorization to Event Hub for generators
+resource "azurerm_eventhub_authorization_rule" "pageviewsSender" {
+  name                = "pageviewsSender"
+  namespace_name      = azurerm_eventhub_namespace.main.name
+  resource_group_name = var.resource_group_name
+  eventhub_name       = azurerm_eventhub.pageviews.name
+  listen              = false
+  send                = true
+  manage              = false
+}
+
+resource "azurerm_eventhub_authorization_rule" "starsSender" {
+  name                = "starsSender"
+  namespace_name      = azurerm_eventhub_namespace.main.name
+  resource_group_name = var.resource_group_name
+  eventhub_name       = azurerm_eventhub.stars.name
+  listen              = false
+  send                = true
+  manage              = false
+}
+
 resource "azurerm_container_group" "stream_pageviews" {
   name                = "stream"
   location            = var.location
@@ -75,7 +114,7 @@ resource "azurerm_container_group" "stream_pageviews" {
   }
 }
 
-
+// Generators with output to SQL
 resource "azurerm_container_group" "generate_orders" {
   name                = "generateorders"
   location            = var.location

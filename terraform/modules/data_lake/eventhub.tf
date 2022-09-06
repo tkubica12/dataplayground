@@ -46,23 +46,5 @@ resource "azurerm_eventhub" "stars" {
   }
 }
 
-resource "azurerm_eventhub_authorization_rule" "pageviewsSender" {
-  name                = "pageviewsSender"
-  namespace_name      = azurerm_eventhub_namespace.main.name
-  resource_group_name = var.resource_group_name
-  eventhub_name       = azurerm_eventhub.pageviews.name
-  listen              = false
-  send                = true
-  manage              = false
-}
 
-resource "azurerm_eventhub_authorization_rule" "starsSender" {
-  name                = "starsSender"
-  namespace_name      = azurerm_eventhub_namespace.main.name
-  resource_group_name = var.resource_group_name
-  eventhub_name       = azurerm_eventhub.stars.name
-  listen              = false
-  send                = true
-  manage              = false
-}
 
