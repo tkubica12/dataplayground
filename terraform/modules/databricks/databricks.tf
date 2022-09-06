@@ -79,7 +79,7 @@ resource "databricks_cluster" "etl_cluster" {
 
 // Identity for Data Factory access
 resource "azurerm_user_assigned_identity" "databricks_df_access" {
-  name                = "databricks_df_access"
+  name                = "datafactory-databrics-access"
   resource_group_name = var.resource_group_name
   location            = var.location
 }

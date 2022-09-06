@@ -41,8 +41,6 @@ module "data_factory" {
   datalake_url               = module.data_lake.datalake_url
   datalake_name              = module.data_lake.datalake_name
   datalake_id                = module.data_lake.datalake_id
-  kv-reader_id               = azurerm_user_assigned_identity.kv-reader.id
-  storage-writer_id          = module.data_lake.storage-writer_id
   databricks_df_access_id    = module.databricks.databricks_df_access_id
   databricks_cluster_id      = module.databricks.databricks_etl_cluster_id
   databricks_domain_id       = module.databricks.databricks_domain_id

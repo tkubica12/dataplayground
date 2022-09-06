@@ -6,8 +6,8 @@ resource "azurerm_data_factory" "main" {
   identity {
     type = "UserAssigned"
     identity_ids = [
-      var.kv-reader_id,
-      var.storage-writer_id,
+      azurerm_user_assigned_identity.datafactory_keyvault_reader.id,
+      azurerm_user_assigned_identity.datafactory_storage_writer.id,
       var.databricks_df_access_id
     ]
   }
@@ -22,7 +22,7 @@ resource "azapi_resource" "dfcredentials" {
     properties = {
       type : "ManagedIdentity"
       typeProperties : {
-        resourceId : var.kv-reader_id
+        resourceId : azurerm_user_assigned_identity.datafactory_keyvault_reader.id
       }
     }
   })
@@ -41,7 +41,7 @@ resource "azapi_resource" "storage-writer" {
     properties = {
       type : "ManagedIdentity"
       typeProperties : {
-        resourceId : var.storage-writer_id
+        resourceId : azurerm_user_assigned_identity.datafactory_storage_writer.id
       }
     }
   })

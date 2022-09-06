@@ -30,14 +30,6 @@ variable "datalake_id" {
   type = string
 }
 
-variable "kv-reader_id" {
-  type = string
-}
-
-variable "storage-writer_id" {
-  type = string
-}
-
 variable "databricks_df_access_id" {
   type = string
 }
