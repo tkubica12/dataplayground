@@ -68,15 +68,15 @@ QUERY
 }
 
 // Start
-# resource "azapi_resource_action" "startcapturepageviews" {
-#   type                   = "Microsoft.StreamAnalytics@2020-03-01"
-#   resource_id            = azurerm_stream_analytics_job.main.id
-#   action                 = "start"
-#   response_export_values = ["*"]
-#   body = jsonencode({
-#     outputStartMode = "JobStartTime"
-#   })
-# }
+resource "azapi_resource_action" "startcapturepageviews" {
+  type                   = "Microsoft.StreamAnalytics/streamingjobs@2020-03-01"
+  resource_id            = azurerm_stream_analytics_job.main.id
+  action                 = "start"
+  response_export_values = ["*"]
+  body = jsonencode({
+    outputStartMode = "JobStartTime"
+  })
+}
 
 resource "azurerm_monitor_diagnostic_setting" "main" {
   name                       = var.name_prefix
