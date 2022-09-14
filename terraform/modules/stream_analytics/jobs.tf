@@ -76,6 +76,23 @@ resource "azapi_resource_action" "startcapturepageviews" {
   body = jsonencode({
     outputStartMode = "JobStartTime"
   })
+
+  depends_on = [
+    azapi_resource.input_users,
+    azapi_resource.pageviews,
+    azapi_resource.stars,
+    azapi_resource.input_vip,
+    azapi_resource.pageviews,
+    azurerm_stream_analytics_output_blob.raw_stars,
+    azurerm_stream_analytics_output_blob.raw_pageviews,
+    azurerm_stream_analytics_output_blob.raw_vip_only,
+    azurerm_stream_analytics_output_blob.pageviews_stars_correlation,
+    azurerm_stream_analytics_output_blob.agg_http_method,
+    azurerm_stream_analytics_output_blob.alert_high_latency,
+    azurerm_stream_analytics_output_blob.alert_high_latency_enriched,
+    azurerm_stream_analytics_output_blob.first_event_in_user_sequence,
+
+  ]
 }
 
 resource "azurerm_monitor_diagnostic_setting" "main" {

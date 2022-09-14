@@ -69,12 +69,12 @@ resource "databricks_cluster" "etl_cluster" {
   ]
 }
 
-# resource "databricks_library" "user_cluster" {
-#   cluster_id = databricks_cluster.user_cluster.id
-#   maven {
-#     coordinates = "com.microsoft.azure:azure-eventhubs-spark_2.11:2.3.17"
-#   }
-# }
+resource "databricks_library" "user_cluster" {
+  cluster_id = databricks_cluster.user_cluster.id
+  maven {
+    coordinates = "com.microsoft.azure:azure-eventhubs-spark_2.12:2.3.22"
+  }
+}
 
 
 // Identity for Data Factory access
@@ -94,4 +94,37 @@ resource "azurerm_role_assignment" "databricks_df_access" {
   principal_id         = azurerm_user_assigned_identity.databricks_df_access.principal_id
 }
 
+// Authorization to Event Hub for generators
+resource "azurerm_eventhub_authorization_rule" "pageviewsSender" {
+  name                = "pageviewsReceiver"
+  namespace_name      = var.eventhub_namespace_name
+  resource_group_name = var.eventhub_resource_group_name
+  eventhub_name       = var.eventhub_name_pageviews
+  listen              = true
+  send                = false
+  manage              = false
+}
 
+resource "azurerm_eventhub_consumer_group" "pageviewsSender" {
+  name                = "databricks"
+  namespace_name      = var.eventhub_namespace_name
+  resource_group_name = var.eventhub_resource_group_name
+  eventhub_name       = var.eventhub_name_pageviews
+}
+
+resource "azurerm_eventhub_authorization_rule" "starsSender" {
+  name                = "starsReceiver"
+  namespace_name      = var.eventhub_namespace_name
+  resource_group_name = var.eventhub_resource_group_name
+  eventhub_name       = var.eventhub_name_stars
+  listen              = true
+  send                = false
+  manage              = false
+}
+
+resource "azurerm_eventhub_consumer_group" "starsSender" {
+  name                = "databricks"
+  namespace_name      = var.eventhub_namespace_name
+  resource_group_name = var.eventhub_resource_group_name
+  eventhub_name       = var.eventhub_name_stars
+}

@@ -54,13 +54,17 @@ module "data_factory" {
 
 // Databricks
 module "databricks" {
-  source                      = "./modules/databricks"
-  name_prefix                 = random_string.random.result
-  resource_group_name         = azurerm_resource_group.main.name
-  resource_group_id           = azurerm_resource_group.main.id
-  location                    = azurerm_resource_group.main.location
-  storage_account_name        = module.data_lake.datalake_name
-  storage_resource_group_name = azurerm_resource_group.main.name
+  source                       = "./modules/databricks"
+  name_prefix                  = random_string.random.result
+  resource_group_name          = azurerm_resource_group.main.name
+  resource_group_id            = azurerm_resource_group.main.id
+  location                     = azurerm_resource_group.main.location
+  storage_account_name         = module.data_lake.datalake_name
+  storage_resource_group_name  = azurerm_resource_group.main.name
+  eventhub_name_pageviews      = module.data_lake.eventhub_name_pageviews
+  eventhub_name_stars          = module.data_lake.eventhub_name_stars
+  eventhub_namespace_name      = module.data_lake.eventhub_namespace_name
+  eventhub_resource_group_name = azurerm_resource_group.main.name
 }
 
 // Streaming analytics
