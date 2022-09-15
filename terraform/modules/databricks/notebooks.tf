@@ -234,9 +234,13 @@ locals {
 -- COMMAND ----------
 
 USE CATALOG mycatalog;
+USE SCHEMA mydb;
 
 -- COMMAND ----------
 
+REPLACE TABLE engagements
+LOCATION 'abfss://gold@${var.storage_account_name}.dfs.core.windows.net/engagements'
+AS
 SELECT users.id, 
   users.user_name, 
   users.city, 
