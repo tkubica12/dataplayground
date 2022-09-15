@@ -103,3 +103,21 @@ resource "databricks_metastore_data_access" "main" {
   is_default = true
 }
 
+// Gold tier as external location
+resource "databricks_external_location" "gold" {
+  name            = "gold"
+  url             = "abfss://gold@${var.storage_account_name}.dfs.core.windows.net"
+  credential_name = databricks_storage_credential.external_mi.id
+
+  depends_on = [
+    databricks_metastore_assignment.main
+  ]
+}
+
+resource "databricks_grants" "gold" {
+  external_location = databricks_external_location.gold.id
+  grant {
+    principal  =  "account users"
+    privileges = ["CREATE_TABLE", "READ_FILES", "WRITE_FILES"]
+  }
+}
