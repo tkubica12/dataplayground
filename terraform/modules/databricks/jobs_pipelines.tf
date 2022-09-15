@@ -1,8 +1,8 @@
 // Streaming pipelines
 resource "databricks_pipeline" "pageviews" {
   name    = "pageviews"
-  storage = "/mycatalog"
-  target = "mydb"
+  storage = "/"
+  target = "streaming"
 
   cluster {
     label       = "default"

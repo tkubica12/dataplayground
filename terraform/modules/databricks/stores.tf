@@ -1,7 +1,7 @@
 // Metastore
 resource "databricks_metastore" "main" {
-  name          = "mysilver"
-  storage_root  = "abfss://silver@${var.storage_account_name}.dfs.core.windows.net"
+  name          = "mymetastore"
+  storage_root  = "abfss://unity@${var.storage_account_name}.dfs.core.windows.net"
   owner         = "account users"
   force_destroy = true
 
@@ -101,6 +101,25 @@ resource "databricks_metastore_data_access" "main" {
   }
 
   is_default = true
+}
+
+// Silver tier as external location
+resource "databricks_external_location" "silver" {
+  name            = "silver"
+  url             = "abfss://silver@${var.storage_account_name}.dfs.core.windows.net"
+  credential_name = databricks_storage_credential.external_mi.id
+
+  depends_on = [
+    databricks_metastore_assignment.main
+  ]
+}
+
+resource "databricks_grants" "silver" {
+  external_location = databricks_external_location.silver.id
+  grant {
+    principal  =  "account users"
+    privileges = ["CREATE_TABLE", "READ_FILES", "WRITE_FILES"]
+  }
 }
 
 // Gold tier as external location
