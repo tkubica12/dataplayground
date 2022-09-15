@@ -30,7 +30,7 @@ resource "databricks_cluster" "user_cluster" {
   node_type_id            = var.node_sku
   autotermination_minutes = 10
   data_security_mode      = "USER_ISOLATION"
-  num_workers             = 1
+  num_workers = 1
 
   spark_conf = {
     "spark.databricks.io.cache.enabled" : "true"
@@ -41,10 +41,40 @@ resource "databricks_cluster" "user_cluster" {
   ]
 }
 
+resource "databricks_cluster" "etl_cluster" {
+  cluster_name            = "ETL cluster"
+  spark_version           = data.databricks_spark_version.latest.id
+  node_type_id            = var.node_sku
+  autotermination_minutes = 10
+  data_security_mode      = "SINGLE_USER"
+  single_user_name        = azurerm_user_assigned_identity.databricks_df_access.client_id
+
+  spark_conf = {
+    "spark.databricks.cluster.profile" : "singleNode"
+    "spark.master" : "local[*]"
+    "spark.databricks.io.cache.enabled" : "true"
+  }
+
+  custom_tags = {
+    "ResourceClass" = "SingleNode"
+  }
+
+  depends_on = [
+    azurerm_databricks_workspace.main
+  ]
+}
+
+# resource "databricks_library" "user_cluster" {
+#   cluster_id = databricks_cluster.user_cluster.id
+#   maven {
+#     coordinates = "com.microsoft.azure:azure-eventhubs-spark_2.11:2.3.17"
+#   }
+# }
+
 
 // Identity for Data Factory access
 resource "azurerm_user_assigned_identity" "databricks_df_access" {
-  name                = "datafactory-databrics-access"
+  name                = "databricks_df_access"
   resource_group_name = var.resource_group_name
   location            = var.location
 }
@@ -93,3 +123,4 @@ resource "azurerm_eventhub_consumer_group" "starsSender" {
   resource_group_name = var.eventhub_resource_group_name
   eventhub_name       = var.eventhub_name_stars
 }
+
