@@ -7,7 +7,7 @@ output "databricks_df_access_id" {
 }
 
 output "databricks_etl_cluster_id" {
-  value = databricks_cluster.etl_cluster.id
+  value = databricks_cluster.user_cluster.id
 }
 
 output "databricks_resource_id" {

@@ -23,57 +23,22 @@ data "azurerm_storage_account" "data_lake" {
   resource_group_name = var.storage_resource_group_name
 }
 
-// Single node clusters
+// Cluster
 resource "databricks_cluster" "user_cluster" {
   cluster_name            = "User cluster"
   spark_version           = data.databricks_spark_version.latest.id
   node_type_id            = var.node_sku
   autotermination_minutes = 10
-  data_security_mode      = "SINGLE_USER"
+  data_security_mode      = "USER_ISOLATION"
+  num_workers             = 1
 
   spark_conf = {
-    "spark.databricks.cluster.profile" : "singleNode"
-    "spark.master" : "local[*]"
     "spark.databricks.io.cache.enabled" : "true"
-  }
-
-  custom_tags = {
-    "ResourceClass" = "SingleNode"
   }
 
   depends_on = [
     azurerm_databricks_workspace.main
   ]
-}
-
-resource "databricks_cluster" "etl_cluster" {
-  cluster_name            = "ETL cluster"
-  spark_version           = data.databricks_spark_version.latest.id
-  node_type_id            = var.node_sku
-  autotermination_minutes = 10
-  data_security_mode      = "SINGLE_USER"
-  single_user_name        = azurerm_user_assigned_identity.databricks_df_access.client_id
-
-  spark_conf = {
-    "spark.databricks.cluster.profile" : "singleNode"
-    "spark.master" : "local[*]"
-    "spark.databricks.io.cache.enabled" : "true"
-  }
-
-  custom_tags = {
-    "ResourceClass" = "SingleNode"
-  }
-
-  depends_on = [
-    azurerm_databricks_workspace.main
-  ]
-}
-
-resource "databricks_library" "user_cluster" {
-  cluster_id = databricks_cluster.user_cluster.id
-  maven {
-    coordinates = "com.microsoft.azure:azure-eventhubs-spark_2.12:2.3.22"
-  }
 }
 
 
