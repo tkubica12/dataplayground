@@ -22,7 +22,7 @@ resource "databricks_pipeline" "pageviews" {
 resource "databricks_job" "engagement_table" {
   name = "engagement_table"
 
-  existing_cluster_id = databricks_cluster.etl_cluster.id
+  existing_cluster_id = databricks_cluster.user_cluster.id
 
   schedule {
     quartz_cron_expression = "0 */30 * ? * *"
