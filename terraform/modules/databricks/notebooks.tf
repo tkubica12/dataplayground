@@ -324,7 +324,7 @@ from pyspark.sql.functions import *
 from pyspark.sql.types import *
 
 @dlt.table
-def eventhubs_pageviews():
+def stream_pageviews():
     connection = 'kafkashaded.org.apache.kafka.common.security.plain.PlainLoginModule required username="$ConnectionString" password="Endpoint=sb://${var.eventhub_namespace_name}.servicebus.windows.net/;SharedAccessKeyName=pageviewsReceiver;SharedAccessKey=${azurerm_eventhub_authorization_rule.pageviewsSender.primary_key}";'
 
     kafka_options = {
