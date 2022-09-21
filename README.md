@@ -17,7 +17,7 @@ az login
 terraform init
 terraform apply -auto-approve
 ```
-<!-- 
+{% comment %} 
 ## Current architecture
 ```mermaid
 graph LR;
@@ -48,7 +48,7 @@ graph LR;
     classDef endstate fill:#d1e6a8,stroke:#333,stroke-width:2px;
     class Model_API,PowerBI,Real_time_detection endstate;
 ``` 
--->
+{% endcomment %}
 
 ## Data generation
 Data generation module deploys following resources together with containers responsible for data generation and streaming:
