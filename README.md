@@ -17,38 +17,6 @@ az login
 terraform init
 terraform apply -auto-approve
 ```
-{% comment %} 
-## Current architecture
-```mermaid
-graph LR;
-    Users_generator -- JSON lines flat file --> Data_Lake_Bronze;
-    Products_generator -- JSON file per product --> Data_Lake_Bronze;
-    Orders_generator -- table referencing user ID and product ID --> SQL;
-    Items_generator -- table referencing orders --> SQL;
-    Pageviews_generator -- events --> Event_Hub;
-    Stars_generator -- events --> Event_Hub;
-    Event_Hub --> Stream_Analytics -- RAW data as Parquet --> Data_Lake_Bronze;
-    Stream_Analytics -- Aggrerations --> Data_Lake_Silver;
-    Stream_Analytics -- Correlations --> Data_Lake_Silver;
-    Stream_Analytics -- Alerts --> Data_Lake_Silver;
-    SQL --> Data_Factory -- Parquet --> Data_Lake_Bronze;
-    Data_Lake_Bronze --> Databricks -- processing --> Data_Lake_Silver;
-    Data_Factory -. Orchestration .-> Databricks;
-
-    classDef generators fill:#9bd9e6,stroke:#333,stroke-width:2px;
-    class Users_generator,Products_generator,Orders_generator,Items_generator,Page_views_generator generators;
-
-    classDef generators fill:#9bd9e6,stroke:#333,stroke-width:2px;
-    class Users_generator,Products_generator,Orders_generator,Items_generator,Pageviews_generator,Stars_generator generators;
-
-    style Data_Lake_Bronze fill:#b45f06,stroke:#333,stroke-width:2px
-    style Data_Lake_Silver fill:#eeeeee,stroke:#333,stroke-width:2px
-    style Data_Lake_Gold fill:#f7b511,stroke:#333,stroke-width:2px
-        
-    classDef endstate fill:#d1e6a8,stroke:#333,stroke-width:2px;
-    class Model_API,PowerBI,Real_time_detection endstate;
-``` 
-{% endcomment %}
 
 ## Data generation
 Data generation module deploys following resources together with containers responsible for data generation and streaming:
