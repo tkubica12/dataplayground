@@ -1,6 +1,6 @@
 // Resource Group
 resource "azurerm_resource_group" "main" {
-  name     = "data-demo"
+  name     = "data-demo-databricks-solution"
   location = var.location
 }
 
@@ -15,7 +15,7 @@ resource "random_string" "random" {
 
 // Data Lake and data generation
 module "data_lake" {
-  source              = "./modules/data_lake"
+  source              = "../modules/data_lake"
   name_prefix         = random_string.random.result
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
@@ -32,7 +32,8 @@ module "data_lake" {
 
 // ETL to Data Lake
 module "data_factory" {
-  source                     = "./modules/data_factory"
+  count                      = var.enable_data_factory ? 1 : 0
+  source                     = "../modules/data_factory"
   name_prefix                = random_string.random.result
   resource_group_name        = azurerm_resource_group.main.name
   location                   = azurerm_resource_group.main.location
@@ -54,7 +55,7 @@ module "data_factory" {
 
 // Databricks
 module "databricks" {
-  source                       = "./modules/databricks"
+  source                       = "../modules/databricks"
   name_prefix                  = random_string.random.result
   resource_group_name          = azurerm_resource_group.main.name
   resource_group_id            = azurerm_resource_group.main.id
@@ -65,21 +66,4 @@ module "databricks" {
   eventhub_name_stars          = module.data_lake.eventhub_name_stars
   eventhub_namespace_name      = module.data_lake.eventhub_namespace_name
   eventhub_resource_group_name = azurerm_resource_group.main.name
-}
-
-// Streaming analytics
-module "stream_analytics" {
-  source                     = "./modules/stream_analytics"
-  name_prefix                = random_string.random.result
-  resource_group_name        = azurerm_resource_group.main.name
-  location                   = azurerm_resource_group.main.location
-  datalake_url               = module.data_lake.datalake_url
-  datalake_name              = module.data_lake.datalake_name
-  datalake_id                = module.data_lake.datalake_id
-  eventhub_id_pageviews      = module.data_lake.eventhub_id_pageviews
-  eventhub_id_stars          = module.data_lake.eventhub_id_stars
-  eventhub_name_pageviews    = module.data_lake.eventhub_name_pageviews
-  eventhub_name_stars        = module.data_lake.eventhub_name_stars
-  eventhub_namespace_name    = module.data_lake.eventhub_namespace_name
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
 }

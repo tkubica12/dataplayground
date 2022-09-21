@@ -145,17 +145,34 @@ resource "azurerm_data_factory_trigger_schedule" "trigger" {
   frequency = "Minute"
 }
 
-# // Run when users are generated
-# resource "azurerm_data_factory_trigger_blob_event" "users" {
-#   name                = "user_ready"
-#   data_factory_id     = azurerm_data_factory.main.id
-#   storage_account_id  = var.datalake_id
-#   events              = ["Microsoft.Storage.BlobCreated"]
-#   blob_path_ends_with = "users.json"
-#   ignore_empty_blobs  = true
-#   activated           = true
+// Run when users are generated
+resource "azurerm_data_factory_trigger_blob_event" "users" {
+  name                = "users"
+  data_factory_id     = azurerm_data_factory.main.id
+  storage_account_id  = var.datalake_id
+  events              = ["Microsoft.Storage.BlobCreated"]
+  
+  blob_path_begins_with = "/bronze/blobs/users/"
+  ignore_empty_blobs  = true
+  activated           = true
 
-#   pipeline {
-#     name = azurerm_data_factory_pipeline.process_data.name
-#   }
-# }
+  pipeline {
+    name = azurerm_data_factory_pipeline.process_data.name
+  }
+}
+
+// Run when projects are generated
+resource "azurerm_data_factory_trigger_blob_event" "projects" {
+  name                = "projects"
+  data_factory_id     = azurerm_data_factory.main.id
+  storage_account_id  = var.datalake_id
+  events              = ["Microsoft.Storage.BlobCreated"]
+  
+  blob_path_begins_with = "/bronze/blobs/projects/"
+  ignore_empty_blobs  = true
+  activated           = true
+
+  pipeline {
+    name = azurerm_data_factory_pipeline.process_data.name
+  }
+}

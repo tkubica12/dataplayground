@@ -9,8 +9,8 @@ terraform {
       version = "~>3"
     }
     azapi = {
-      source = "azure/azapi"
-       version = "~>0"
+      source  = "azure/azapi"
+      version = "~>0"
     }
   }
 }
