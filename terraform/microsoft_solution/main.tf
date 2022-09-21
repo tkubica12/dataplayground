@@ -70,3 +70,11 @@ module "stream_analytics" {
   eventhub_namespace_name    = module.data_lake.eventhub_namespace_name
   log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
 }
+
+// Synapse
+module "synapse" {
+  source                             = "../modules/synapse"
+  name_prefix                        = random_string.random.result
+  resource_group_name                = azurerm_resource_group.main.name
+  location                           = azurerm_resource_group.main.location
+}

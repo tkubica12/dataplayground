@@ -3,16 +3,21 @@ This repo contains my data learning project. In order to play with enough data I
 
 **Whole playground is designed to be completely automated with no prior dependencies. By running single Terraform template everything should get deployed, generators, streamers and other software started as containers hosted in Azure and Databrics, Synapse or Data Factory configurations pushed using proper Terraform providers or via Git references.**
 
+Basic data playground is packaged as reusable module (data lake, generators, SQL database) on top of which two solutions are built and can be deployed separately:
+- Databricks solution -> End goal is using Databricks for ETL, stream processing, analytics and visualization
+- Microsoft solution -> End goal is using Synapse for ETL and analytics, Stream Analytics for streaming and PowerBI for visualization
+
 ## Deployment
 Go to terraform folder and run it. Note that generators are started as Azure Container Instances and might take few hours to complete. In main.tf when calling modules you can modify certain inputs such as ammount of data generated.
 
 ```bash
 cd terraform
+cd databricks_solution   # or microsoft_solution
 az login
 terraform init
 terraform apply -auto-approve
 ```
-
+<!-- 
 ## Current architecture
 ```mermaid
 graph LR;
@@ -42,7 +47,8 @@ graph LR;
         
     classDef endstate fill:#d1e6a8,stroke:#333,stroke-width:2px;
     class Model_API,PowerBI,Real_time_detection endstate;
-```
+``` 
+-->
 
 ## Data generation
 Data generation module deploys following resources together with containers responsible for data generation and streaming:
