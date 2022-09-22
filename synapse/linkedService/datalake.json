@@ -9,7 +9,7 @@
 		"annotations": [],
 		"type": "AzureBlobFS",
 		"typeProperties": {
-			"url": "@{linkedService().datalake_url}"
+			"url": "https://@{linkedService().datalake_url}"
 		},
 		"connectVia": {
 			"referenceName": "AutoResolveIntegrationRuntime",
