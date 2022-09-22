@@ -8,11 +8,11 @@
 		"synapsetfpurdwbpcrr-WorkspaceDefaultSqlServer_connectionString": {
 			"value": ""
 		},
+		"datalake_properties_typeProperties_url": {
+			"value": "https://@{linkedService().datalake_url}"
+		},
 		"synapsetfpurdwbpcrr-WorkspaceDefaultStorage_properties_typeProperties_url": {
 			"value": "https://synapsetfpurdwbpcrr.dfs.core.windows.net"
-		},
-		"datalake_properties_typeProperties_url": {
-			"value": "@{linkedService().datalake_url}"
 		}
 	}
 }
