@@ -1,0 +1,142 @@
+{
+	"name": "IngestData",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "datalake",
+						"type": "LinkedServiceReference"
+					},
+					"name": "users"
+				},
+				{
+					"linkedService": {
+						"referenceName": "datalake",
+						"type": "LinkedServiceReference"
+					},
+					"name": "vipusers"
+				},
+				{
+					"linkedService": {
+						"referenceName": "datalake",
+						"type": "LinkedServiceReference"
+					},
+					"name": "products"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "datalake",
+						"type": "LinkedServiceReference"
+					},
+					"name": "usersSilver"
+				},
+				{
+					"linkedService": {
+						"referenceName": "datalake",
+						"type": "LinkedServiceReference"
+					},
+					"name": "vipusersSilver"
+				},
+				{
+					"linkedService": {
+						"referenceName": "datalake",
+						"type": "LinkedServiceReference"
+					},
+					"name": "productsSilver"
+				}
+			],
+			"transformations": [],
+			"scriptLines": [
+				"source(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: true,",
+				"     enableCdc: true,",
+				"     mode: 'read',",
+				"     skipInitialLoad: false,",
+				"     format: 'json',",
+				"     fileSystem: 'bronze',",
+				"     folderPath: 'users/users.json',",
+				"     documentForm: 'documentPerLine') ~> users",
+				"source(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: true,",
+				"     enableCdc: true,",
+				"     mode: 'read',",
+				"     skipInitialLoad: false,",
+				"     format: 'json',",
+				"     fileSystem: 'bronze',",
+				"     folderPath: 'users/vip.json',",
+				"     documentForm: 'documentPerLine') ~> vipusers",
+				"source(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: true,",
+				"     enableCdc: true,",
+				"     mode: 'read',",
+				"     skipInitialLoad: false,",
+				"     format: 'json',",
+				"     fileSystem: 'bronze',",
+				"     folderPath: 'products',",
+				"     documentForm: 'singleDocument') ~> products",
+				"users sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'silver',",
+				"     folderPath: 'users',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     keys:['id'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> usersSilver",
+				"vipusers sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'silver',",
+				"     folderPath: 'vipusers',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> vipusersSilver",
+				"products sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'silver',",
+				"     folderPath: 'products',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> productsSilver"
+			]
+		}
+	}
+}
