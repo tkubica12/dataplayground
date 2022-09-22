@@ -1,5 +1,5 @@
 {
-	"name": "IngestData",
+	"name": "IngestJsonData",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
