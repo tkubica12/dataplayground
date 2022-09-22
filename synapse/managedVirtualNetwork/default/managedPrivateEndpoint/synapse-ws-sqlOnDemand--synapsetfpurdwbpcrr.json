@@ -1,0 +1,10 @@
+{
+	"name": "synapse-ws-sqlOnDemand--synapsetfpurdwbpcrr",
+	"properties": {
+		"privateLinkResourceId": "/subscriptions/d3b7888f-c26e-4961-a976-ff9d5b31dfd3/resourceGroups/data-demo-microsoft-solution/providers/Microsoft.Synapse/workspaces/synapsetfpurdwbpcrr",
+		"groupId": "sqlOnDemand",
+		"fqdns": [
+			"synapsetfpurdwbpcrr-ondemand.73435bb7-f6a4-41fa-9db2-f2739115a993.sql.azuresynapse.net"
+		]
+	}
+}

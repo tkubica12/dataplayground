@@ -1,0 +1,11 @@
+{
+	"name": "datalake",
+	"type": "Microsoft.Synapse/workspaces/linkedservices",
+	"properties": {
+		"type": "AzureBlobFS",
+		"typeProperties": {
+			"url": "https://tfpurdwbpcrr.dfs.core.windows.net/"
+		},
+		"annotations": []
+	}
+}
