@@ -73,8 +73,11 @@ module "stream_analytics" {
 
 // Synapse
 module "synapse" {
-  source                             = "../modules/synapse"
-  name_prefix                        = random_string.random.result
-  resource_group_name                = azurerm_resource_group.main.name
-  location                           = azurerm_resource_group.main.location
+  source              = "../modules/synapse"
+  name_prefix         = random_string.random.result
+  resource_group_name = azurerm_resource_group.main.name
+  location            = azurerm_resource_group.main.location
+  keyvault_id         = azurerm_key_vault.main.id
+  datalake_id         = module.data_lake.datalake_id
+  datalake_url        = module.data_lake.datalake_url
 }

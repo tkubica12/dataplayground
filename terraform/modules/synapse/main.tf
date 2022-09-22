@@ -18,24 +18,6 @@ resource "azurerm_storage_data_lake_gen2_filesystem" "synapse" {
 // Get client details
 data "azurerm_client_config" "current" {}
 
-// Key Vault
-resource "azurerm_key_vault" "main" {
-  name                      = "synapse${var.name_prefix}"
-  resource_group_name       = var.resource_group_name
-  location                  = var.location
-  tenant_id                 = data.azurerm_client_config.current.tenant_id
-  sku_name                  = "standard"
-  purge_protection_enabled  = true
-  enable_rbac_authorization = true
-}
-
-// RBAC for current client to access Key Vault
-resource "azurerm_role_assignment" "currentuser-kv" {
-  scope                = azurerm_key_vault.main.id
-  role_definition_name = "Key Vault Secrets Officer"
-  principal_id         = data.azurerm_client_config.current.object_id
-}
-
 // Generate SQL password
 resource "random_password" "sql" {
   length           = 16
@@ -54,7 +36,7 @@ resource "random_password" "sql" {
 resource "azurerm_key_vault_secret" "sql" {
   name         = "sql"
   value        = random_password.sql.result
-  key_vault_id = azurerm_key_vault.main.id
+  key_vault_id = var.keyvault_id
 }
 
 // Synapse workspace
@@ -87,9 +69,15 @@ resource "azurerm_synapse_workspace" "main" {
 
   github_repo {
     account_name    = "tkubica12"
-    branch_name     = "synapse-collab"
-    repository_name = "azure-workshops"
+    branch_name     = "main"
+    repository_name = "dataplayground"
     root_folder     = "/synapse"
+  }
+
+  lifecycle {
+    ignore_changes = [
+      github_repo.0.last_commit_id
+    ]
   }
 }
 
@@ -98,4 +86,10 @@ resource "azurerm_synapse_firewall_rule" "all" {
   synapse_workspace_id = azurerm_synapse_workspace.main.id
   start_ip_address     = "0.0.0.0"
   end_ip_address       = "255.255.255.255"
+}
+
+resource "azurerm_role_assignment" "main" {
+  scope                = var.datalake_id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = azurerm_synapse_workspace.main.identity.0.principal_id
 }
