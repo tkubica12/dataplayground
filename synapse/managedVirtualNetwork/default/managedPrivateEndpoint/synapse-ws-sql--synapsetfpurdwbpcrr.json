@@ -1,0 +1,10 @@
+{
+	"name": "synapse-ws-sql--synapsetfpurdwbpcrr",
+	"properties": {
+		"privateLinkResourceId": "/subscriptions/d3b7888f-c26e-4961-a976-ff9d5b31dfd3/resourceGroups/data-demo-microsoft-solution/providers/Microsoft.Synapse/workspaces/synapsetfpurdwbpcrr",
+		"groupId": "sql",
+		"fqdns": [
+			"synapsetfpurdwbpcrr.a99ee69f-fcda-418d-bfcc-e9dc54d0dc00.sql.azuresynapse.net"
+		]
+	}
+}
