@@ -11,13 +11,21 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'synapsetfpurdwbpcrr-WorkspaceDefaultSqlServer'"
 		},
+		"synapsetfpurdwbpcrr-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://synapsetfpurdwbpcrr.dfs.core.windows.net"
+		},
 		"datalake_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://tfpurdwbpcrr.dfs.core.windows.net/"
 		},
-		"synapsetfpurdwbpcrr-WorkspaceDefaultStorage_properties_typeProperties_url": {
+		"KeyVault_properties_typeProperties_baseUrl": {
 			"type": "string",
-			"defaultValue": "https://synapsetfpurdwbpcrr.dfs.core.windows.net"
+			"defaultValue": "https://tfpurdwbpcrr.vault.azure.net/"
+		},
+		"SQL_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "dfsqlconnection"
 		}
 	},
 	"variables": {
@@ -25,171 +33,21 @@
 	},
 	"resources": [
 		{
-			"name": "[concat(parameters('workspaceName'), '/DataPipeline')]",
-			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"name": "[concat(parameters('workspaceName'), '/default')]",
+			"type": "Microsoft.Synapse/workspaces/managedVirtualNetworks",
 			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"activities": [
-					{
-						"name": "IngestData",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "IngestData",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"users": {},
-									"vipusers": {},
-									"products": {},
-									"usersSilver": {},
-									"vipusersSilver": {},
-									"productsSilver": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine",
-							"runConcurrently": true,
-							"continueOnError": true,
-							"continuationSettings": {
-								"customizedCheckpointKey": "8ccec2a4-cbd1-4cf7-ae38-fe695ee85088"
-							}
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/dataflows/IngestData')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/datalake')]",
-			"type": "Microsoft.Synapse/workspaces/linkedServices",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"annotations": [],
-				"type": "AzureBlobFS",
-				"typeProperties": {
-					"url": "[parameters('datalake_properties_typeProperties_url')]"
-				}
-			},
+			"properties": {},
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/synapsetfpurdwbpcrr-WorkspaceDefaultSqlServer')]",
-			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"name": "[concat(parameters('workspaceName'), '/WorkspaceSystemIdentity')]",
+			"type": "Microsoft.Synapse/workspaces/credentials",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
-				"parameters": {
-					"DBName": {
-						"type": "String"
-					}
-				},
-				"annotations": [],
-				"type": "AzureSqlDW",
-				"typeProperties": {
-					"connectionString": "[parameters('synapsetfpurdwbpcrr-WorkspaceDefaultSqlServer_connectionString')]"
-				},
-				"connectVia": {
-					"referenceName": "AutoResolveIntegrationRuntime",
-					"type": "IntegrationRuntimeReference"
-				}
+				"type": "ManagedIdentity",
+				"typeProperties": {}
 			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/synapsetfpurdwbpcrr-WorkspaceDefaultStorage')]",
-			"type": "Microsoft.Synapse/workspaces/linkedServices",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"annotations": [],
-				"type": "AzureBlobFS",
-				"typeProperties": {
-					"url": "[parameters('synapsetfpurdwbpcrr-WorkspaceDefaultStorage_properties_typeProperties_url')]"
-				},
-				"connectVia": {
-					"referenceName": "AutoResolveIntegrationRuntime",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/Every15minutes')]",
-			"type": "Microsoft.Synapse/workspaces/triggers",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Stopped",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "DataPipeline",
-							"type": "PipelineReference"
-						},
-						"parameters": {}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Minute",
-						"interval": 15,
-						"startTime": "2022-09-23T04:01:00Z",
-						"timeZone": "UTC"
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/pipelines/DataPipeline')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/AutoResolveIntegrationRuntime')]",
-			"type": "Microsoft.Synapse/workspaces/integrationRuntimes",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"type": "Managed",
-				"typeProperties": {
-					"computeProperties": {
-						"location": "AutoResolve",
-						"dataFlowProperties": {
-							"computeType": "General",
-							"coreCount": 8,
-							"timeToLive": 0
-						}
-					}
-				},
-				"managedVirtualNetwork": {
-					"type": "ManagedVirtualNetworkReference",
-					"referenceName": "default"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/managedVirtualNetworks/default')]"
-			]
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('workspaceName'), '/IngestData')]",
@@ -339,23 +197,6 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/WorkspaceSystemIdentity')]",
-			"type": "Microsoft.Synapse/workspaces/credentials",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"type": "ManagedIdentity",
-				"typeProperties": {}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/default')]",
-			"type": "Microsoft.Synapse/workspaces/managedVirtualNetworks",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {},
-			"dependsOn": []
-		},
-		{
 			"name": "[concat(parameters('workspaceName'), '/default/synapse-ws-sql--synapsetfpurdwbpcrr')]",
 			"type": "Microsoft.Synapse/workspaces/managedVirtualNetworks/managedPrivateEndpoints",
 			"apiVersion": "2019-06-01-preview",
@@ -380,6 +221,213 @@
 				"fqdns": [
 					"synapsetfpurdwbpcrr-ondemand.73435bb7-f6a4-41fa-9db2-f2739115a993.sql.azuresynapse.net"
 				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/managedVirtualNetworks/default')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/synapsetfpurdwbpcrr-WorkspaceDefaultStorage')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('synapsetfpurdwbpcrr-WorkspaceDefaultStorage_properties_typeProperties_url')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/synapsetfpurdwbpcrr-WorkspaceDefaultSqlServer')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"parameters": {
+					"DBName": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDW",
+				"typeProperties": {
+					"connectionString": "[parameters('synapsetfpurdwbpcrr-WorkspaceDefaultSqlServer_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/datalake')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('datalake_properties_typeProperties_url')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/KeyVault')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureKeyVault",
+				"typeProperties": {
+					"baseUrl": "[parameters('KeyVault_properties_typeProperties_baseUrl')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQL')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "KeyVault",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "[parameters('SQL_properties_typeProperties_connectionString_secretName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/KeyVault')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/DataPipeline')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "IngestData",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "IngestData",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"users": {},
+									"vipusers": {},
+									"products": {},
+									"usersSilver": {},
+									"vipusersSilver": {},
+									"productsSilver": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine",
+							"runConcurrently": true,
+							"continueOnError": true,
+							"continuationSettings": {
+								"customizedCheckpointKey": "8ccec2a4-cbd1-4cf7-ae38-fe695ee85088"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-09-23T04:03:58Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/dataflows/IngestData')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Every15minutes')]",
+			"type": "Microsoft.Synapse/workspaces/triggers",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "DataPipeline",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Minute",
+						"interval": 15,
+						"startTime": "2022-09-23T04:01:00Z",
+						"timeZone": "UTC"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/pipelines/DataPipeline')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/AutoResolveIntegrationRuntime')]",
+			"type": "Microsoft.Synapse/workspaces/integrationRuntimes",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "Managed",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "AutoResolve",
+						"dataFlowProperties": {
+							"computeType": "General",
+							"coreCount": 8,
+							"timeToLive": 0,
+							"cleanup": true
+						},
+						"pipelineExternalComputeScaleProperties": {
+							"timeToLive": 60
+						}
+					}
+				},
+				"managedVirtualNetwork": {
+					"type": "ManagedVirtualNetworkReference",
+					"referenceName": "default"
+				}
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/managedVirtualNetworks/default')]"
