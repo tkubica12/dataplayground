@@ -24,6 +24,20 @@
 						"type": "LinkedServiceReference"
 					},
 					"name": "products"
+				},
+				{
+					"linkedService": {
+						"referenceName": "SQL",
+						"type": "LinkedServiceReference"
+					},
+					"name": "orders"
+				},
+				{
+					"linkedService": {
+						"referenceName": "SQL",
+						"type": "LinkedServiceReference"
+					},
+					"name": "items"
 				}
 			],
 			"sinks": [
@@ -47,6 +61,20 @@
 						"type": "LinkedServiceReference"
 					},
 					"name": "productsSilver"
+				},
+				{
+					"linkedService": {
+						"referenceName": "datalake",
+						"type": "LinkedServiceReference"
+					},
+					"name": "ordersSilver"
+				},
+				{
+					"linkedService": {
+						"referenceName": "datalake",
+						"type": "LinkedServiceReference"
+					},
+					"name": "itemsSilver"
 				}
 			],
 			"transformations": [],
@@ -81,6 +109,20 @@
 				"     fileSystem: 'bronze',",
 				"     folderPath: 'products',",
 				"     documentForm: 'singleDocument') ~> products",
+				"source(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table',",
+				"     store: 'sqlserver',",
+				"     schemaName: 'dbo',",
+				"     tableName: 'orders',",
+				"     isolationLevel: 'READ_UNCOMMITTED') ~> orders",
+				"source(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table',",
+				"     store: 'sqlserver',",
+				"     schemaName: 'dbo',",
+				"     tableName: 'items',",
+				"     isolationLevel: 'READ_UNCOMMITTED') ~> items",
 				"users sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
@@ -135,7 +177,43 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> productsSilver"
+				"     skipDuplicateMapOutputs: true) ~> productsSilver",
+				"orders sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'silver',",
+				"     folderPath: 'orders',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> ordersSilver",
+				"items sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'silver',",
+				"     folderPath: 'items',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> itemsSilver"
 			]
 		}
 	}
