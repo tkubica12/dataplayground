@@ -1,0 +1,11 @@
+{
+	"name": "KeyVault",
+	"type": "Microsoft.Synapse/workspaces/linkedservices",
+	"properties": {
+		"type": "AzureKeyVault",
+		"typeProperties": {
+			"baseUrl": "https://tfpurdwbpcrr.vault.azure.net/"
+		},
+		"annotations": []
+	}
+}
