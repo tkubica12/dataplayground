@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 1",
+	"properties": {
+		"content": {
+			"query": "SELECT TOP 10 users.id, users.user_name, users.city, ISNULL(vipusers.id, 0)\nFROM OPENROWSET(\n    BULK 'https://tfpurdwbpcrr.dfs.core.windows.net/silver/users/',\n    FORMAT = 'delta') as users\nLEFT JOIN OPENROWSET(\n    BULK 'https://tfpurdwbpcrr.dfs.core.windows.net/silver/vipusers/',\n    FORMAT = 'delta') as vipusers ON users.id = vipusers.id",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "master",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
