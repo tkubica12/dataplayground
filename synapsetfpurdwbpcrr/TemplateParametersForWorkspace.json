@@ -8,17 +8,17 @@
 		"synapsetfpurdwbpcrr-WorkspaceDefaultSqlServer_connectionString": {
 			"value": ""
 		},
-		"synapsetfpurdwbpcrr-WorkspaceDefaultStorage_properties_typeProperties_url": {
-			"value": "https://synapsetfpurdwbpcrr.dfs.core.windows.net"
-		},
-		"datalake_properties_typeProperties_url": {
-			"value": "https://tfpurdwbpcrr.dfs.core.windows.net/"
-		},
 		"KeyVault_properties_typeProperties_baseUrl": {
 			"value": "https://tfpurdwbpcrr.vault.azure.net/"
 		},
 		"SQL_properties_typeProperties_connectionString_secretName": {
 			"value": "dfsqlconnection"
+		},
+		"datalake_properties_typeProperties_url": {
+			"value": "https://tfpurdwbpcrr.dfs.core.windows.net/"
+		},
+		"synapsetfpurdwbpcrr-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"value": "https://synapsetfpurdwbpcrr.dfs.core.windows.net"
 		}
 	}
 }

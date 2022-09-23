@@ -11,14 +11,6 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'synapsetfpurdwbpcrr-WorkspaceDefaultSqlServer'"
 		},
-		"synapsetfpurdwbpcrr-WorkspaceDefaultStorage_properties_typeProperties_url": {
-			"type": "string",
-			"defaultValue": "https://synapsetfpurdwbpcrr.dfs.core.windows.net"
-		},
-		"datalake_properties_typeProperties_url": {
-			"type": "string",
-			"defaultValue": "https://tfpurdwbpcrr.dfs.core.windows.net/"
-		},
 		"KeyVault_properties_typeProperties_baseUrl": {
 			"type": "string",
 			"defaultValue": "https://tfpurdwbpcrr.vault.azure.net/"
@@ -26,6 +18,14 @@
 		"SQL_properties_typeProperties_connectionString_secretName": {
 			"type": "string",
 			"defaultValue": "dfsqlconnection"
+		},
+		"datalake_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://tfpurdwbpcrr.dfs.core.windows.net/"
+		},
+		"synapsetfpurdwbpcrr-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://synapsetfpurdwbpcrr.dfs.core.windows.net"
 		}
 	},
 	"variables": {
@@ -33,254 +33,65 @@
 	},
 	"resources": [
 		{
-			"name": "[concat(parameters('workspaceName'), '/default')]",
-			"type": "Microsoft.Synapse/workspaces/managedVirtualNetworks",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/WorkspaceSystemIdentity')]",
-			"type": "Microsoft.Synapse/workspaces/credentials",
+			"name": "[concat(parameters('workspaceName'), '/DataPipeline')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
-				"type": "ManagedIdentity",
-				"typeProperties": {}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/IngestData')]",
-			"type": "Microsoft.Synapse/workspaces/dataflows",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"linkedService": {
-								"referenceName": "datalake",
-								"type": "LinkedServiceReference"
-							},
-							"name": "users"
+				"activities": [
+					{
+						"name": "IngestData",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
 						},
-						{
-							"linkedService": {
-								"referenceName": "datalake",
-								"type": "LinkedServiceReference"
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "IngestData",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"users": {},
+									"vipusers": {},
+									"products": {},
+									"orders": {},
+									"items": {},
+									"usersSilver": {},
+									"vipusersSilver": {},
+									"productsSilver": {},
+									"ordersSilver": {},
+									"itemsSilver": {}
+								}
 							},
-							"name": "vipusers"
-						},
-						{
-							"linkedService": {
-								"referenceName": "datalake",
-								"type": "LinkedServiceReference"
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
 							},
-							"name": "products"
+							"traceLevel": "Fine",
+							"runConcurrently": true,
+							"continueOnError": true,
+							"continuationSettings": {
+								"customizedCheckpointKey": "b29a4961-ab55-4f89-984a-64379707d76f"
+							}
 						}
-					],
-					"sinks": [
-						{
-							"linkedService": {
-								"referenceName": "datalake",
-								"type": "LinkedServiceReference"
-							},
-							"name": "usersSilver"
-						},
-						{
-							"linkedService": {
-								"referenceName": "datalake",
-								"type": "LinkedServiceReference"
-							},
-							"name": "vipusersSilver"
-						},
-						{
-							"linkedService": {
-								"referenceName": "datalake",
-								"type": "LinkedServiceReference"
-							},
-							"name": "productsSilver"
-						}
-					],
-					"transformations": [],
-					"scriptLines": [
-						"source(allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     ignoreNoFilesFound: true,",
-						"     enableCdc: true,",
-						"     mode: 'read',",
-						"     skipInitialLoad: false,",
-						"     format: 'json',",
-						"     fileSystem: 'bronze',",
-						"     folderPath: 'users/users.json',",
-						"     documentForm: 'documentPerLine') ~> users",
-						"source(allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     ignoreNoFilesFound: true,",
-						"     enableCdc: true,",
-						"     mode: 'read',",
-						"     skipInitialLoad: false,",
-						"     format: 'json',",
-						"     fileSystem: 'bronze',",
-						"     folderPath: 'users/vip.json',",
-						"     documentForm: 'documentPerLine') ~> vipusers",
-						"source(allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     ignoreNoFilesFound: true,",
-						"     enableCdc: true,",
-						"     mode: 'read',",
-						"     skipInitialLoad: false,",
-						"     format: 'json',",
-						"     fileSystem: 'bronze',",
-						"     folderPath: 'products',",
-						"     documentForm: 'singleDocument') ~> products",
-						"users sink(allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     format: 'delta',",
-						"     fileSystem: 'silver',",
-						"     folderPath: 'users',",
-						"     mergeSchema: false,",
-						"     autoCompact: false,",
-						"     optimizedWrite: false,",
-						"     vacuum: 0,",
-						"     deletable:false,",
-						"     insertable:true,",
-						"     updateable:false,",
-						"     upsertable:false,",
-						"     keys:['id'],",
-						"     umask: 0022,",
-						"     preCommands: [],",
-						"     postCommands: [],",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true) ~> usersSilver",
-						"vipusers sink(allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     format: 'delta',",
-						"     fileSystem: 'silver',",
-						"     folderPath: 'vipusers',",
-						"     mergeSchema: false,",
-						"     autoCompact: false,",
-						"     optimizedWrite: false,",
-						"     vacuum: 0,",
-						"     deletable:false,",
-						"     insertable:true,",
-						"     updateable:false,",
-						"     upsertable:false,",
-						"     umask: 0022,",
-						"     preCommands: [],",
-						"     postCommands: [],",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true) ~> vipusersSilver",
-						"products sink(allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     format: 'delta',",
-						"     fileSystem: 'silver',",
-						"     folderPath: 'products',",
-						"     mergeSchema: false,",
-						"     autoCompact: false,",
-						"     optimizedWrite: false,",
-						"     vacuum: 0,",
-						"     deletable:false,",
-						"     insertable:true,",
-						"     updateable:false,",
-						"     upsertable:false,",
-						"     umask: 0022,",
-						"     preCommands: [],",
-						"     postCommands: [],",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true) ~> productsSilver"
-					]
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/linkedServices/datalake')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/default/synapse-ws-sql--synapsetfpurdwbpcrr')]",
-			"type": "Microsoft.Synapse/workspaces/managedVirtualNetworks/managedPrivateEndpoints",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"privateLinkResourceId": "/subscriptions/d3b7888f-c26e-4961-a976-ff9d5b31dfd3/resourceGroups/data-demo-microsoft-solution/providers/Microsoft.Synapse/workspaces/synapsetfpurdwbpcrr",
-				"groupId": "sql",
-				"fqdns": [
-					"synapsetfpurdwbpcrr.73435bb7-f6a4-41fa-9db2-f2739115a993.sql.azuresynapse.net"
-				]
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/managedVirtualNetworks/default')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/default/synapse-ws-sqlOnDemand--synapsetfpurdwbpcrr')]",
-			"type": "Microsoft.Synapse/workspaces/managedVirtualNetworks/managedPrivateEndpoints",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"privateLinkResourceId": "/subscriptions/d3b7888f-c26e-4961-a976-ff9d5b31dfd3/resourceGroups/data-demo-microsoft-solution/providers/Microsoft.Synapse/workspaces/synapsetfpurdwbpcrr",
-				"groupId": "sqlOnDemand",
-				"fqdns": [
-					"synapsetfpurdwbpcrr-ondemand.73435bb7-f6a4-41fa-9db2-f2739115a993.sql.azuresynapse.net"
-				]
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/managedVirtualNetworks/default')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/synapsetfpurdwbpcrr-WorkspaceDefaultStorage')]",
-			"type": "Microsoft.Synapse/workspaces/linkedServices",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"annotations": [],
-				"type": "AzureBlobFS",
-				"typeProperties": {
-					"url": "[parameters('synapsetfpurdwbpcrr-WorkspaceDefaultStorage_properties_typeProperties_url')]"
-				},
-				"connectVia": {
-					"referenceName": "AutoResolveIntegrationRuntime",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/synapsetfpurdwbpcrr-WorkspaceDefaultSqlServer')]",
-			"type": "Microsoft.Synapse/workspaces/linkedServices",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"parameters": {
-					"DBName": {
-						"type": "String"
 					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
 				},
 				"annotations": [],
-				"type": "AzureSqlDW",
-				"typeProperties": {
-					"connectionString": "[parameters('synapsetfpurdwbpcrr-WorkspaceDefaultSqlServer_connectionString')]"
-				},
-				"connectVia": {
-					"referenceName": "AutoResolveIntegrationRuntime",
-					"type": "IntegrationRuntimeReference"
-				}
+				"lastPublishTime": "2022-09-23T04:03:58Z"
 			},
 			"dependsOn": [
-				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+				"[concat(variables('workspaceId'), '/dataflows/IngestData')]"
 			]
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/datalake')]",
-			"type": "Microsoft.Synapse/workspaces/linkedServices",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"annotations": [],
-				"type": "AzureBlobFS",
-				"typeProperties": {
-					"url": "[parameters('datalake_properties_typeProperties_url')]"
-				}
-			},
-			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('workspaceName'), '/KeyVault')]",
@@ -318,60 +129,59 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/DataPipeline')]",
-			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"name": "[concat(parameters('workspaceName'), '/datalake')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
-				"activities": [
-					{
-						"name": "IngestData",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "IngestData",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"users": {},
-									"vipusers": {},
-									"products": {},
-									"usersSilver": {},
-									"vipusersSilver": {},
-									"productsSilver": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine",
-							"runConcurrently": true,
-							"continueOnError": true,
-							"continuationSettings": {
-								"customizedCheckpointKey": "8ccec2a4-cbd1-4cf7-ae38-fe695ee85088"
-							}
-						}
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('datalake_properties_typeProperties_url')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/synapsetfpurdwbpcrr-WorkspaceDefaultSqlServer')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"parameters": {
+					"DBName": {
+						"type": "String"
 					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
 				},
 				"annotations": [],
-				"lastPublishTime": "2022-09-23T04:03:58Z"
+				"type": "AzureSqlDW",
+				"typeProperties": {
+					"connectionString": "[parameters('synapsetfpurdwbpcrr-WorkspaceDefaultSqlServer_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
 			},
 			"dependsOn": [
-				"[concat(variables('workspaceId'), '/dataflows/IngestData')]"
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/synapsetfpurdwbpcrr-WorkspaceDefaultStorage')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('synapsetfpurdwbpcrr-WorkspaceDefaultStorage_properties_typeProperties_url')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
 			]
 		},
 		{
@@ -428,6 +238,279 @@
 					"type": "ManagedVirtualNetworkReference",
 					"referenceName": "default"
 				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/managedVirtualNetworks/default')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/IngestData')]",
+			"type": "Microsoft.Synapse/workspaces/dataflows",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"linkedService": {
+								"referenceName": "datalake",
+								"type": "LinkedServiceReference"
+							},
+							"name": "users"
+						},
+						{
+							"linkedService": {
+								"referenceName": "datalake",
+								"type": "LinkedServiceReference"
+							},
+							"name": "vipusers"
+						},
+						{
+							"linkedService": {
+								"referenceName": "datalake",
+								"type": "LinkedServiceReference"
+							},
+							"name": "products"
+						},
+						{
+							"linkedService": {
+								"referenceName": "SQL",
+								"type": "LinkedServiceReference"
+							},
+							"name": "orders"
+						},
+						{
+							"linkedService": {
+								"referenceName": "SQL",
+								"type": "LinkedServiceReference"
+							},
+							"name": "items"
+						}
+					],
+					"sinks": [
+						{
+							"linkedService": {
+								"referenceName": "datalake",
+								"type": "LinkedServiceReference"
+							},
+							"name": "usersSilver"
+						},
+						{
+							"linkedService": {
+								"referenceName": "datalake",
+								"type": "LinkedServiceReference"
+							},
+							"name": "vipusersSilver"
+						},
+						{
+							"linkedService": {
+								"referenceName": "datalake",
+								"type": "LinkedServiceReference"
+							},
+							"name": "productsSilver"
+						},
+						{
+							"linkedService": {
+								"referenceName": "datalake",
+								"type": "LinkedServiceReference"
+							},
+							"name": "ordersSilver"
+						},
+						{
+							"linkedService": {
+								"referenceName": "datalake",
+								"type": "LinkedServiceReference"
+							},
+							"name": "itemsSilver"
+						}
+					],
+					"transformations": [],
+					"scriptLines": [
+						"source(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: true,",
+						"     enableCdc: true,",
+						"     mode: 'read',",
+						"     skipInitialLoad: false,",
+						"     format: 'json',",
+						"     fileSystem: 'bronze',",
+						"     folderPath: 'users/users.json',",
+						"     documentForm: 'documentPerLine') ~> users",
+						"source(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: true,",
+						"     enableCdc: true,",
+						"     mode: 'read',",
+						"     skipInitialLoad: false,",
+						"     format: 'json',",
+						"     fileSystem: 'bronze',",
+						"     folderPath: 'users/vip.json',",
+						"     documentForm: 'documentPerLine') ~> vipusers",
+						"source(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: true,",
+						"     enableCdc: true,",
+						"     mode: 'read',",
+						"     skipInitialLoad: false,",
+						"     format: 'json',",
+						"     fileSystem: 'bronze',",
+						"     folderPath: 'products',",
+						"     documentForm: 'singleDocument') ~> products",
+						"source(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'table',",
+						"     store: 'sqlserver',",
+						"     schemaName: 'dbo',",
+						"     tableName: 'orders',",
+						"     isolationLevel: 'READ_UNCOMMITTED') ~> orders",
+						"source(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'table',",
+						"     store: 'sqlserver',",
+						"     schemaName: 'dbo',",
+						"     tableName: 'items',",
+						"     isolationLevel: 'READ_UNCOMMITTED') ~> items",
+						"users sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'silver',",
+						"     folderPath: 'users',",
+						"     mergeSchema: false,",
+						"     autoCompact: false,",
+						"     optimizedWrite: false,",
+						"     vacuum: 0,",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     keys:['id'],",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> usersSilver",
+						"vipusers sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'silver',",
+						"     folderPath: 'vipusers',",
+						"     mergeSchema: false,",
+						"     autoCompact: false,",
+						"     optimizedWrite: false,",
+						"     vacuum: 0,",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> vipusersSilver",
+						"products sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'silver',",
+						"     folderPath: 'products',",
+						"     mergeSchema: false,",
+						"     autoCompact: false,",
+						"     optimizedWrite: false,",
+						"     vacuum: 0,",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> productsSilver",
+						"orders sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'silver',",
+						"     folderPath: 'orders',",
+						"     mergeSchema: false,",
+						"     autoCompact: false,",
+						"     optimizedWrite: false,",
+						"     vacuum: 0,",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> ordersSilver",
+						"items sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'silver',",
+						"     folderPath: 'items',",
+						"     mergeSchema: false,",
+						"     autoCompact: false,",
+						"     optimizedWrite: false,",
+						"     vacuum: 0,",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> itemsSilver"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/datalake')]",
+				"[concat(variables('workspaceId'), '/linkedServices/SQL')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/WorkspaceSystemIdentity')]",
+			"type": "Microsoft.Synapse/workspaces/credentials",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "ManagedIdentity",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/default')]",
+			"type": "Microsoft.Synapse/workspaces/managedVirtualNetworks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/default/synapse-ws-sql--synapsetfpurdwbpcrr')]",
+			"type": "Microsoft.Synapse/workspaces/managedVirtualNetworks/managedPrivateEndpoints",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"privateLinkResourceId": "/subscriptions/d3b7888f-c26e-4961-a976-ff9d5b31dfd3/resourceGroups/data-demo-microsoft-solution/providers/Microsoft.Synapse/workspaces/synapsetfpurdwbpcrr",
+				"groupId": "sql",
+				"fqdns": [
+					"synapsetfpurdwbpcrr.73435bb7-f6a4-41fa-9db2-f2739115a993.sql.azuresynapse.net"
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/managedVirtualNetworks/default')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/default/synapse-ws-sqlOnDemand--synapsetfpurdwbpcrr')]",
+			"type": "Microsoft.Synapse/workspaces/managedVirtualNetworks/managedPrivateEndpoints",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"privateLinkResourceId": "/subscriptions/d3b7888f-c26e-4961-a976-ff9d5b31dfd3/resourceGroups/data-demo-microsoft-solution/providers/Microsoft.Synapse/workspaces/synapsetfpurdwbpcrr",
+				"groupId": "sqlOnDemand",
+				"fqdns": [
+					"synapsetfpurdwbpcrr-ondemand.73435bb7-f6a4-41fa-9db2-f2739115a993.sql.azuresynapse.net"
+				]
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/managedVirtualNetworks/default')]"
