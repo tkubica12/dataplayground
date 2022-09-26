@@ -1,3 +1,5 @@
+locals {
+  IngestData = <<JSON
 {
 	"name": "IngestData",
 	"properties": {
@@ -129,4 +131,24 @@
 			]
 		}
 	}
+}
+JSON
+}
+
+resource "null_resource" "data_flow_ingest_data" {
+  provisioner "local-exec" {
+    command = "az synapse data-flow create -n $name --workspace-name $workspace_name --file '${local.IngestData}'"
+    environment = {
+      workspace_name = azurerm_synapse_workspace.main.name
+      name           = jsondecode(local.IngestData).name
+    }
+  }
+  
+  triggers = {
+    always_run = "${timestamp()}"
+  }
+}
+
+output "test" {
+  value = jsondecode(local.IngestData).name
 }

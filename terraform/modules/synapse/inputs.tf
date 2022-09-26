@@ -14,6 +14,10 @@ variable "keyvault_id" {
   type = string
 }
 
+variable "keyvault_url" {
+  type = string
+}
+
 variable "datalake_id" {
   type = string
 }

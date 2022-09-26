@@ -45,7 +45,7 @@ data "azuread_user" "current" {
 }
 
 resource "azurerm_synapse_workspace" "main" {
-  name                                 = "synapse${var.name_prefix}"
+  name                                 = "s${var.name_prefix}"
   resource_group_name                  = var.resource_group_name
   location                             = var.location
   storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.synapse.id
@@ -53,7 +53,7 @@ resource "azurerm_synapse_workspace" "main" {
   sql_administrator_login_password     = random_password.sql.result
   managed_virtual_network_enabled      = true
   public_network_access_enabled        = true
-  managed_resource_group_name          = "synapse-rg-${var.resource_group_name}"
+  managed_resource_group_name          = "${var.resource_group_name}-synapse"
 
   identity {
     type = "SystemAssigned"
@@ -67,18 +67,18 @@ resource "azurerm_synapse_workspace" "main" {
     }
   ]
 
-  github_repo {
-    account_name    = "tkubica12"
-    branch_name     = "main"
-    repository_name = "dataplayground"
-    root_folder     = "/synapse"
-  }
+  # github_repo {
+  #   account_name    = "tkubica12"
+  #   branch_name     = "main"
+  #   repository_name = "dataplayground"
+  #   root_folder     = "/synapse"
+  # }
 
-  lifecycle {
-    ignore_changes = [
-      github_repo.0.last_commit_id
-    ]
-  }
+  # lifecycle {
+  #   ignore_changes = [
+  #     github_repo.0.last_commit_id
+  #   ]
+  # }
 }
 
 resource "azurerm_synapse_firewall_rule" "all" {
@@ -88,8 +88,3 @@ resource "azurerm_synapse_firewall_rule" "all" {
   end_ip_address       = "255.255.255.255"
 }
 
-resource "azurerm_role_assignment" "main" {
-  scope                = var.datalake_id
-  role_definition_name = "Storage Blob Data Contributor"
-  principal_id         = azurerm_synapse_workspace.main.identity.0.principal_id
-}

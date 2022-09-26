@@ -1,3 +1,5 @@
+locals {
+  DataPipeline = <<JSON
 {
 	"name": "DataPipeline",
 	"properties": {
@@ -25,15 +27,31 @@
 					},
 					"traceLevel": "Fine",
 					"runConcurrently": true,
-					"continueOnError": true,
-					"continuationSettings": {
-						"customizedCheckpointKey": "b29a4961-ab55-4f89-984a-64379707d76f"
-					}
+					"continueOnError": true
 				}
 			}
 		],
-		"annotations": [],
-		"lastPublishTime": "2022-09-23T04:03:58Z"
+		"annotations": []
 	},
 	"type": "Microsoft.Synapse/workspaces/pipelines"
+}
+JSON
+}
+
+resource "null_resource" "pipeline_data_pipeline" {
+  provisioner "local-exec" {
+    command = "az synapse pipeline create -n $name --workspace-name $workspace_name --file '${local.DataPipeline}'"
+    environment = {
+      workspace_name = azurerm_synapse_workspace.main.name
+      name           = jsondecode(local.DataPipeline).name
+    }
+  }
+
+  triggers = {
+    always_run = "${timestamp()}"
+  }
+
+  depends_on = [
+    null_resource.data_flow_ingest_data
+  ]
 }

@@ -78,6 +78,7 @@ module "synapse" {
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
   keyvault_id         = azurerm_key_vault.main.id
+  keyvault_url        = azurerm_key_vault.main.vault_uri
   datalake_id         = module.data_lake.datalake_id
   datalake_url        = module.data_lake.datalake_url
 }
