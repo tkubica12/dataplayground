@@ -6,6 +6,10 @@
 		"typeProperties": {
 			"url": "https://tfpurdwbpcrr.dfs.core.windows.net/"
 		},
-		"annotations": []
+		"annotations": [],
+		"connectVia": {
+			"referenceName": "AutoResolveIntegrationRuntime",
+			"type": "IntegrationRuntimeReference"
+		}
 	}
 }
