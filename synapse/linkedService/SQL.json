@@ -1,0 +1,18 @@
+{
+	"name": "SQL",
+	"type": "Microsoft.Synapse/workspaces/linkedservices",
+	"properties": {
+		"type": "AzureSqlDatabase",
+		"typeProperties": {
+			"connectionString": {
+				"secretName": "dfsqlconnection",
+				"store": {
+					"referenceName": "KeyVault",
+					"type": "LinkedServiceReference"
+				},
+				"type": "AzureKeyVaultSecret"
+			}
+		},
+		"annotations": []
+	}
+}
