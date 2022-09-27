@@ -33,34 +33,36 @@ Data sources:
 
 See [datageneration](datageneration/datageneration.md) for more details.
 
-## Data preparation and movement
-This part contains consolidation of data sources into bronze tier and potentialy some manipulations and preparation.
-
-- Data Factory gets deployed by Terraform with
-  - Linked services
-    - Key Vault service authenticated via User Managed Identity
-    - SQL service with secrets stored in Key Vault
-    - Data Lake gen2 service authenticated via User Managed Identity
-  - Datasets
-    - order and items tables in SQL (source)
-    - order and items as Parquet files in Data Lake gen2 (sink)
-  - Pipelines
-    - Copy operation triggered every hour from SQL tables to Data Lake followed by Databricks job to process orders, items, pageviews, products and users fro bronze tier to Delta tables in Silver tier
+## Microsoft solution
+- Synapse is deployed
 - Stream Analytics getting raw pageviews and stars stream to bronze tier as Parquet files
-- Databricks processing orchestrated by Data Factory
-  - Two clusters - single node and serverless
-  - Notebook to get data from bronze tier and create Delta tables in silver tier using managed tables in Unity Catalog
-  - All access to storage (load from bronze tier and store for managed tables) is authenticated via managed identity (no passwords or keys)
-  - Data movement from SQL do bronze tier and coordinated run of Databricks notebook is orchestrated via Data Factory pipeline
-  
-## Data analysis
-- Stream Analytics
+- Data processed from bronze tier and Azure SQL into Delta Tables in silver tier using DataFlow and Pipeline
+- BI table is generated into gold tier by aggregating data from all sources into Parquet files
+- Simle PowerBI dashboard
+- Stream Analytics enrichment scenarios (output as files to silver tier)
   - Alert on high latency requests
   - Enriching pageviews data with customer information for high latency requests
   - Aggregating pageviews by HTTP method in 5 minutes window
   - Alerting on VIP users access (by looking up vip.json)
   - Correlating two streams (pageviews of users who also gave star over last 15 minutes)
-- TBD: Structured Streaming using Azure Databricks (implement the same functionality as above using different tool)
-- TBD: Azure Databricks advanced processing, visualization and ML
-- TBD: PowerBI dashboard to visualize data (+ using Synapse or Databricks serverless to read Delta from data lake)
-- TBD: AzureML training model using data processed by Databricks
+
+
+TBD:
+- Automate silver-to-gold with increments
+- Incorporate AzureML
+
+## Databricks solution
+- Workspace deployed with cluster definitions
+- Unity Catalog using managed identity to access storage layer
+- Processing data from bronze tier to silver using Databricks managed Delta tables
+- Preparation of BI table into gold tier (currently just SQL command)
+- Processing raw Kafka events from Event Hub with Live Tables
+
+TBD:
+- ETL from SQL
+- Redisign bronze-to-silver to use autoloaders
+- Implement other streaming scenarios with Live Tables
+- Visualizations with Dashboard
+- Incorporate SQL persona, investigate serverless SQL warehouse
+- Leverage AutoML in Databricks
+- Store gold data in gold tier in files as external table (unmanaged - for other integrations)
