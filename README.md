@@ -63,7 +63,7 @@ TBD:
   - Identiy high latency pageviews
 
 TBD:
-- Impement other streaming scenarios (waiting for DLT support for Unity Catalog)
+- Implement other streaming scenarios (waiting for DLT support for Unity Catalog)
 - Redisign bronze-to-silver to use DLT (waiting for DLT support for Unity Catalog)
 - Visualizations with Dashboard
 - Incorporate SQL persona, investigate serverless SQL warehouse

@@ -3,7 +3,7 @@ resource "databricks_pipeline" "streaming" {
   name    = "streaming"
   storage = "/"
   target  = "streaming"
-  edition = "Pro"
+  edition = "pro"
 
   cluster {
     label       = "default"

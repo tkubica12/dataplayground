@@ -145,3 +145,67 @@ resource "databricks_notebook" "sql_loader" {
   language       = "SQL"
   path           = "/Shared/sql_loader"
 }
+
+
+// ETL pipeline - for future redesign to DLT
+# resource "databricks_pipeline" "etl" {
+#   name    = "etl"
+#   storage = "/"
+#   target  = "etl"
+
+#   cluster {
+#     label       = "default"
+#     num_workers = 1
+#   }
+
+#   library {
+#     notebook {
+#       path = databricks_notebook.delta_live_etl.id
+#     }
+#   }
+
+#   continuous = false
+# }
+
+// ETL: Delta Live Tables
+# locals {
+#   delta_live_etl = <<CONTENT
+# -- Databricks notebook source
+# -- MAGIC %md
+# -- MAGIC # Load users
+
+# -- COMMAND ----------
+
+# CREATE OR REFRESH STREAMING LIVE TABLE users
+# AS SELECT * FROM cloud_files("abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/users/", "json")
+
+# -- COMMAND ----------
+
+# -- MAGIC %md
+# -- MAGIC # Load VIP users
+
+# -- COMMAND ----------
+
+# CREATE OR REFRESH STREAMING LIVE TABLE vipusers
+# AS SELECT * FROM cloud_files("abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/vipusers/", "json")
+
+# -- COMMAND ----------
+
+# -- MAGIC %md
+# -- MAGIC # Load Products
+
+# -- COMMAND ----------
+
+# CREATE OR REFRESH STREAMING LIVE TABLE products
+# AS SELECT * FROM cloud_files("abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/products/", "json")
+
+# -- COMMAND ----------
+
+# CONTENT
+# }
+
+# resource "databricks_notebook" "delta_live_etl" {
+#   content_base64 = base64encode(local.delta_live_etl)
+#   language       = "SQL"
+#   path           = "/Shared/delta_live_etl"
+# }
