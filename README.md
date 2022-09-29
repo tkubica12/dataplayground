@@ -53,7 +53,9 @@ TBD:
 ## Databricks solution
 - Workspace deployed with cluster definitions
 - Unity Catalog using managed identity to access storage layer
-- Using auto-loader to get data from bronze tier to managed Unity Catalog tables
+- Using auto-loader to get data from bronze tier to managed Unity Catalog tables (users, vipusers and products)
+- Usign job to ingest data from SQL (orders and items)
+- BI table into gold tier (scheduled as job)
 - Streaming scenario with Delta Live Tables
   - Processing raw Kafka events from Event Hub
   - Parsing stream (decode base64 and parse JSON)
@@ -62,8 +64,6 @@ TBD:
 
 TBD:
 - Impement other streaming scenarios (waiting for DLT support for Unity Catalog)
-- Preparation of BI table into gold tier (depends on getting SQL data in)
-- ETL from SQL
 - Redisign bronze-to-silver to use DLT (waiting for DLT support for Unity Catalog)
 - Visualizations with Dashboard
 - Incorporate SQL persona, investigate serverless SQL warehouse

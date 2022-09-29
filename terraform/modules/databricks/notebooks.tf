@@ -4,14 +4,10 @@ locals {
 -- Databricks notebook source
 -- MAGIC %md
 -- MAGIC # Precalculate User Engagement table
--- COMMAND ----------
-
-USE CATALOG mycatalog;
-USE SCHEMA mydb;
 
 -- COMMAND ----------
 
-REPLACE TABLE engagements
+CREATE OR REPLACE TABLE mycatalog.mydb.engagements
 LOCATION 'abfss://gold@${var.storage_account_name}.dfs.core.windows.net/engagements'
 AS
 SELECT users.id, 
@@ -25,40 +21,19 @@ SELECT users.id,
   AVG(stars.stars) AS avg_stars,
   iff(isnull(vipusers.id), false, true) AS is_vip
 FROM mycatalog.mydb.users
-LEFT JOIN (
-  SELECT timestamp,  get_json_object(CAST(value AS string), '$.user_id') AS user_id
-  FROM hive_metastore.streaming.stream_pageviews) AS pageviews 
+LEFT JOIN hive_metastore.streaming.parsed_pageviews AS pageviews 
 ON users.id = pageviews.user_id
 LEFT JOIN (
   SELECT orders.userId, orders.orderValue, orders.orderId, COUNT(items.orderId) AS itemsCount
   FROM mycatalog.mydb.orders
-  LEFT JOIN mydb.items ON orders.orderId = items.orderId
+  LEFT JOIN mycatalog.mydb.items ON orders.orderId = items.orderId
   GROUP BY orders.userId, orders.orderValue, orders.orderId) AS aggregatedOrders
 ON users.id = aggregatedOrders.userId
-LEFT JOIN mycatalog.mydb.stars ON users.id = stars.user_id
+LEFT JOIN hive_metastore.streaming.parsed_stars AS stars ON users.id = stars.user_id
 LEFT JOIN mycatalog.mydb.vipusers ON users.id = vipusers.id
 GROUP BY users.id, users.user_name, users.city, is_vip;
 
 -- COMMAND ----------
-
-SELECT users.id, 
-  users.user_name, 
-  users.city, 
-  COUNT(pageviews.user_id) AS pageviews, 
-  AVG(stars.stars) AS avg_stars,
-  iff(isnull(vipusers.id), false, true) AS is_vip
-FROM mycatalog.mydb.users
-LEFT JOIN (
-  SELECT timestamp,  get_json_object(CAST(value AS string), '$.user_id') AS user_id
-  FROM hive_metastore.streaming.stream_pageviews) AS pageviews 
-ON users.id = pageviews.user_id
-LEFT JOIN (
-  SELECT get_json_object(CAST(value AS string), '$.user_id') AS user_id,
-    get_json_object(CAST(value AS string), '$.stars') AS stars
-  FROM hive_metastore.streaming.stream_stars) AS stars
-ON users.id = stars.user_id
-LEFT JOIN mycatalog.mydb.vipusers ON users.id = vipusers.id
-GROUP BY users.id, users.user_name, users.city, is_vip;
 
 -- COMMAND ----------
 CONTENT
@@ -68,76 +43,6 @@ resource "databricks_notebook" "create_engagement_table" {
   content_base64 = base64encode(local.create_engagement_table)
   language       = "SQL"
   path           = "/Shared/create_engagement_table"
-}
-
-// BRONZE-to-SILVER: Users, VIP users, products
-locals {
-  data_lake_loader = <<CONTENT
-# Databricks notebook source
-# MAGIC %md
-# MAGIC # Users
-
-# COMMAND ----------
-
-data_path = "abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/users/"
-checkpoint_path = "abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/_checkpoint/users"
-
-(spark.readStream
-  .format("cloudFiles")
-  .option("cloudFiles.format", "json")
-  .option("cloudFiles.schemaLocation", checkpoint_path)
-  .load(data_path)
-  .writeStream
-  .option("checkpointLocation", checkpoint_path)
-  .trigger(availableNow=True)
-  .toTable("mycatalog.mydb.users"))
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC # VIP Users
-
-# COMMAND ----------
-
-data_path = "abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/vipusers/"
-checkpoint_path = "abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/_checkpoint/vipusers"
-
-(spark.readStream
-  .format("cloudFiles")
-  .option("cloudFiles.format", "json")
-  .option("cloudFiles.schemaLocation", checkpoint_path)
-  .load(data_path)
-  .writeStream
-  .option("checkpointLocation", checkpoint_path)
-  .trigger(availableNow=True)
-  .toTable("mycatalog.mydb.vipusers"))
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC # Products
-
-# COMMAND ----------
-
-data_path = "abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/products/"
-checkpoint_path = "abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/_checkpoint/products"
-
-(spark.readStream
-  .format("cloudFiles")
-  .option("cloudFiles.format", "json")
-  .option("cloudFiles.schemaLocation", checkpoint_path)
-  .load(data_path)
-  .writeStream
-  .option("checkpointLocation", checkpoint_path)
-  .trigger(availableNow=True)
-  .toTable("mycatalog.mydb.products"))
-CONTENT
-}
-
-resource "databricks_notebook" "data_lake_loader" {
-  content_base64 = base64encode(local.data_lake_loader)
-  language       = "PYTHON"
-  path           = "/Shared/data_lake_loader"
 }
 
 // ETL: Delta Live Tables
