@@ -28,12 +28,6 @@ resource "azurerm_storage_container" "gold" {
   container_access_type = "private"
 }
 
-resource "azurerm_storage_container" "unity" {
-  name                  = "unity"
-  storage_account_name  = azurerm_storage_account.main.name
-  container_access_type = "private"
-}
-
 // Add current account RBAC
 data "azurerm_client_config" "storage" {
 }

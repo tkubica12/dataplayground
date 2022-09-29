@@ -59,7 +59,7 @@ file.flush_data(offset+length)    # Commit all blocks
 ### Generate list of VIP users ###
 
 # Create Azure Data Lake Storage file handler
-file = DataLakeFileClient(account_url=storageSas,file_system_name='users', file_path='vip.json')
+file = DataLakeFileClient(account_url=storageSas,file_system_name='vipusers', file_path='vipusers.json')
 file.create_file()
 
 # Generate and write records

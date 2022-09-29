@@ -4,6 +4,7 @@ resource "azurerm_databricks_workspace" "main" {
   resource_group_name = var.resource_group_name
   location            = var.location
   sku                 = "trial"
+  managed_resource_group_name = "data-demo-databricks-solution-dbxinfra"
 }
 
 
@@ -24,8 +25,8 @@ data "azurerm_storage_account" "data_lake" {
 }
 
 // Cluster
-resource "databricks_cluster" "user_cluster" {
-  cluster_name            = "User cluster"
+resource "databricks_cluster" "shared_cluster" {
+  cluster_name            = "Shared cluster"
   spark_version           = data.databricks_spark_version.latest.id
   node_type_id            = var.node_sku
   autotermination_minutes = 10
@@ -41,13 +42,13 @@ resource "databricks_cluster" "user_cluster" {
   ]
 }
 
-resource "databricks_cluster" "etl_cluster" {
-  cluster_name            = "ETL cluster"
+resource "databricks_cluster" "single_user_cluster" {
+  cluster_name            = "Singe user cluster"
   spark_version           = data.databricks_spark_version.latest.id
   node_type_id            = var.node_sku
   autotermination_minutes = 10
   data_security_mode      = "SINGLE_USER"
-  single_user_name        = azurerm_user_assigned_identity.databricks_df_access.client_id
+  single_user_name        = data.databricks_current_user.me.user_name
 
   spark_conf = {
     "spark.databricks.cluster.profile" : "singleNode"
@@ -71,26 +72,8 @@ resource "databricks_cluster" "etl_cluster" {
 #   }
 # }
 
-
-// Identity for Data Factory access
-resource "azurerm_user_assigned_identity" "databricks_df_access" {
-  name                = "databricks_df_access"
-  resource_group_name = var.resource_group_name
-  location            = var.location
-}
-
-resource "random_uuid" "databricks_df_access" {
-}
-
-resource "azurerm_role_assignment" "databricks_df_access" {
-  name                 = random_uuid.databricks_df_access.result
-  scope                = azurerm_databricks_workspace.main.id
-  role_definition_name = "Contributor"
-  principal_id         = azurerm_user_assigned_identity.databricks_df_access.principal_id
-}
-
-// Authorization to Event Hub for generators
-resource "azurerm_eventhub_authorization_rule" "pageviewsSender" {
+// Authorization to Event Hub for Databricks
+resource "azurerm_eventhub_authorization_rule" "pageviewsReceiver" {
   name                = "pageviewsReceiver"
   namespace_name      = var.eventhub_namespace_name
   resource_group_name = var.eventhub_resource_group_name
@@ -100,14 +83,14 @@ resource "azurerm_eventhub_authorization_rule" "pageviewsSender" {
   manage              = false
 }
 
-resource "azurerm_eventhub_consumer_group" "pageviewsSender" {
+resource "azurerm_eventhub_consumer_group" "pageviewsReceiver" {
   name                = "databricks"
   namespace_name      = var.eventhub_namespace_name
   resource_group_name = var.eventhub_resource_group_name
   eventhub_name       = var.eventhub_name_pageviews
 }
 
-resource "azurerm_eventhub_authorization_rule" "starsSender" {
+resource "azurerm_eventhub_authorization_rule" "starsReceiver" {
   name                = "starsReceiver"
   namespace_name      = var.eventhub_namespace_name
   resource_group_name = var.eventhub_resource_group_name
@@ -117,7 +100,7 @@ resource "azurerm_eventhub_authorization_rule" "starsSender" {
   manage              = false
 }
 
-resource "azurerm_eventhub_consumer_group" "starsSender" {
+resource "azurerm_eventhub_consumer_group" "starsReceiver" {
   name                = "databricks"
   namespace_name      = var.eventhub_namespace_name
   resource_group_name = var.eventhub_resource_group_name

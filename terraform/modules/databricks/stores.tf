@@ -1,7 +1,7 @@
 // Metastore
 resource "databricks_metastore" "main" {
   name          = "mymetastore"
-  storage_root  = "abfss://unity@${var.storage_account_name}.dfs.core.windows.net"
+  storage_root  = "abfss://silver@${var.storage_account_name}.dfs.core.windows.net"
   owner         = "account users"
   force_destroy = true
 
@@ -104,23 +104,23 @@ resource "databricks_metastore_data_access" "main" {
 }
 
 // Silver tier as external location
-resource "databricks_external_location" "silver" {
-  name            = "silver"
-  url             = "abfss://silver@${var.storage_account_name}.dfs.core.windows.net"
-  credential_name = databricks_storage_credential.external_mi.id
+# resource "databricks_external_location" "silver" {
+#   name            = "silver"
+#   url             = "abfss://silver@${var.storage_account_name}.dfs.core.windows.net"
+#   credential_name = databricks_storage_credential.external_mi.id
 
-  depends_on = [
-    databricks_metastore_assignment.main
-  ]
-}
+#   depends_on = [
+#     databricks_metastore_assignment.main
+#   ]
+# }
 
-resource "databricks_grants" "silver" {
-  external_location = databricks_external_location.silver.id
-  grant {
-    principal  =  "account users"
-    privileges = ["CREATE_TABLE", "READ_FILES", "WRITE_FILES"]
-  }
-}
+# resource "databricks_grants" "silver" {
+#   external_location = databricks_external_location.silver.id
+#   grant {
+#     principal  =  "account users"
+#     privileges = ["CREATE_TABLE", "READ_FILES", "WRITE_FILES"]
+#   }
+# }
 
 // Gold tier as external location
 resource "databricks_external_location" "gold" {
@@ -135,6 +135,25 @@ resource "databricks_external_location" "gold" {
 
 resource "databricks_grants" "gold" {
   external_location = databricks_external_location.gold.id
+  grant {
+    principal  =  "account users"
+    privileges = ["CREATE_TABLE", "READ_FILES", "WRITE_FILES"]
+  }
+}
+
+// Bronze tier as external location
+resource "databricks_external_location" "bronze" {
+  name            = "bronze"
+  url             = "abfss://bronze@${var.storage_account_name}.dfs.core.windows.net"
+  credential_name = databricks_storage_credential.external_mi.id
+
+  depends_on = [
+    databricks_metastore_assignment.main
+  ]
+}
+
+resource "databricks_grants" "bronze" {
+  external_location = databricks_external_location.bronze.id
   grant {
     principal  =  "account users"
     privileges = ["CREATE_TABLE", "READ_FILES", "WRITE_FILES"]

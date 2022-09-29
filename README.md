@@ -46,7 +46,6 @@ See [datageneration](datageneration/datageneration.md) for more details.
   - Alerting on VIP users access (by looking up vip.json)
   - Correlating two streams (pageviews of users who also gave star over last 15 minutes)
 
-
 TBD:
 - Automate silver-to-gold with increments
 - Incorporate AzureML

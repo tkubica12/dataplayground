@@ -1,8 +1,9 @@
-// Streaming pipelines
-resource "databricks_pipeline" "pageviews" {
-  name    = "pageviews"
+
+// ETL pipeline
+resource "databricks_pipeline" "etl" {
+  name    = "etl"
   storage = "/"
-  target = "streaming"
+  target  = "etl"
 
   cluster {
     label       = "default"
@@ -11,7 +12,7 @@ resource "databricks_pipeline" "pageviews" {
 
   library {
     notebook {
-      path = databricks_notebook.delta_live_stream.id
+      path = databricks_notebook.delta_live_etl.id
     }
   }
 
@@ -22,14 +23,29 @@ resource "databricks_pipeline" "pageviews" {
 resource "databricks_job" "engagement_table" {
   name = "engagement_table"
 
-  existing_cluster_id = databricks_cluster.user_cluster.id
+  existing_cluster_id = databricks_cluster.single_user_cluster.id
 
   schedule {
-    quartz_cron_expression = "0 */30 * ? * *"
+    quartz_cron_expression = "0 */50 * ? * *"
     timezone_id            = "UTC"
   }
 
   notebook_task {
     notebook_path = databricks_notebook.create_engagement_table.id
+  }
+}
+
+resource "databricks_job" "data_lake_loader" {
+  name = "data_lake_loader"
+
+  existing_cluster_id = databricks_cluster.single_user_cluster.id
+
+  schedule {
+    quartz_cron_expression = "0 */50 * ? * *"
+    timezone_id            = "UTC"
+  }
+
+  notebook_task {
+    notebook_path = databricks_notebook.data_lake_loader.id
   }
 }

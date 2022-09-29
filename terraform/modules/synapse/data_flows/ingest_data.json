@@ -125,7 +125,7 @@
                 "     skipInitialLoad: false,",
                 "     format: 'json',",
                 "     fileSystem: 'bronze',",
-                "     folderPath: 'users/vip.json',",
+                "     folderPath: 'vipusers/vipusers.json',",
                 "     documentForm: 'documentPerLine') ~> vipusers",
                 "source(allowSchemaDrift: true,",
                 "     validateSchema: false,",
