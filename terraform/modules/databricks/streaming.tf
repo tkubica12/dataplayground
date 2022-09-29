@@ -167,8 +167,8 @@ AS SELECT live.parsed_pageviews.user_id,
           live.parsed_pageviews.user_agent,
           live.parsed_pageviews.latency,
           live.parsed_stars.stars
-FROM live.parsed_pageviews
-JOIN live.parsed_stars 
+FROM STREAM(live.parsed_pageviews)
+JOIN STREAM(live.parsed_stars)
   ON live.parsed_pageviews.user_id = live.parsed_stars.user_id
   AND DATEDIFF(MINUTE, live.parsed_pageviews.timestamp,live.parsed_stars.timestamp) BETWEEN 0 AND 15  
 
