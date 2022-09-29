@@ -108,15 +108,22 @@ data "azurerm_key_vault_secret" "sql_password" {
 locals {
   sql_loader = <<CONTENT
 -- Databricks notebook source
-CREATE TABLE IF NOT EXISTS jdbc_orders
-USING org.apache.spark.sql.jdbc
-OPTIONS (
-  url "jdbc:sqlserver://${var.sql_server_name}.database.windows.net:1433;database=orders",
-  database "orders",
-  dbtable "orders",
-  user "tomas",
-  password "${data.azurerm_key_vault_secret.sql_password.value}"
-)
+
+-- MAGIC %python
+-- MAGIC azuresql_password = dbutils.secrets.get(scope="jdbc", key="azuresql")
+-- MAGIC 
+-- MAGIC command = '''
+-- MAGIC CREATE TABLE IF NOT EXISTS jdbc_orders
+-- MAGIC USING org.apache.spark.sql.jdbc
+-- MAGIC OPTIONS (
+-- MAGIC   url "jdbc:sqlserver://${var.sql_server_name}.database.windows.net:1433;database=orders",
+-- MAGIC   database "orders",
+-- MAGIC   dbtable "orders",
+-- MAGIC   user "tomas",
+-- MAGIC   password "{0}"
+-- MAGIC )'''.format(azuresql_password)
+-- MAGIC 
+-- MAGIC spark.sql(command)
 
 -- COMMAND ----------
 
@@ -125,15 +132,21 @@ AS SELECT * FROM jdbc_orders
 
 -- COMMAND ----------
 
-CREATE TABLE IF NOT EXISTS jdbc_items
-USING org.apache.spark.sql.jdbc
-OPTIONS (
-  url "jdbc:sqlserver://${var.sql_server_name}.database.windows.net:1433;database=orders",
-  database "orders",
-  dbtable "items",
-  user "tomas",
-  password "${data.azurerm_key_vault_secret.sql_password.value}"
-)
+-- MAGIC %python
+-- MAGIC azuresql_password = dbutils.secrets.get(scope="jdbc", key="azuresql")
+-- MAGIC 
+-- MAGIC command = '''
+-- MAGIC CREATE TABLE IF NOT EXISTS jdbc_items
+-- MAGIC USING org.apache.spark.sql.jdbc
+-- MAGIC OPTIONS (
+-- MAGIC   url "jdbc:sqlserver://${var.sql_server_name}.database.windows.net:1433;database=orders",
+-- MAGIC   database "orders",
+-- MAGIC   dbtable "items",
+-- MAGIC   user "tomas",
+-- MAGIC   password "{0}"
+-- MAGIC )'''.format(azuresql_password)
+-- MAGIC 
+-- MAGIC spark.sql(command)
 
 -- COMMAND ----------
 
