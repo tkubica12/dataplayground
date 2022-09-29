@@ -42,3 +42,11 @@ variable "eventhub_namespace_name" {
 variable "eventhub_resource_group_name" {
   type = string
 }
+
+variable "sql_server_name" {
+  type = string
+}
+
+variable "keyvault_id" {
+  type = string
+}

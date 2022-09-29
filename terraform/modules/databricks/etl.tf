@@ -100,17 +100,22 @@ resource "databricks_notebook" "data_lake_loader" {
 }
 
 // BRONZE-to-SILVER: SQL loader for orders and items
+data "azurerm_key_vault_secret" "sql_password" { 
+  name         = "sqlpassword"
+  key_vault_id = var.keyvault_id
+}
+
 locals {
   sql_loader = <<CONTENT
 -- Databricks notebook source
 CREATE TABLE IF NOT EXISTS jdbc_orders
 USING org.apache.spark.sql.jdbc
 OPTIONS (
-  url "jdbc:sqlserver://lsafbfuvyjbm.database.windows.net:1433;database=orders",
+  url "jdbc:sqlserver://${var.sql_server_name}.database.windows.net:1433;database=orders",
   database "orders",
   dbtable "orders",
   user "tomas",
-  password "zTmoZoCU?o5QtnhG"
+  password "${data.azurerm_key_vault_secret.sql_password.value}"
 )
 
 -- COMMAND ----------
@@ -123,11 +128,11 @@ AS SELECT * FROM jdbc_orders
 CREATE TABLE IF NOT EXISTS jdbc_items
 USING org.apache.spark.sql.jdbc
 OPTIONS (
-  url "jdbc:sqlserver://lsafbfuvyjbm.database.windows.net:1433;database=orders",
+  url "jdbc:sqlserver://${var.sql_server_name}.database.windows.net:1433;database=orders",
   database "orders",
   dbtable "items",
   user "tomas",
-  password "zTmoZoCU?o5QtnhG"
+  password "${data.azurerm_key_vault_secret.sql_password.value}"
 )
 
 -- COMMAND ----------

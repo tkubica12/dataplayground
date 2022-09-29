@@ -29,3 +29,7 @@ output "eventhub_id_pageviews" {
 output "eventhub_id_stars" {
   value = azurerm_eventhub.stars.id
 }
+
+output "sql_server_name" {
+  value = azurerm_mssql_server.main.name
+}
