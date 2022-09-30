@@ -127,6 +127,7 @@ resource "databricks_external_location" "gold" {
   name            = "gold"
   url             = "abfss://gold@${var.storage_account_name}.dfs.core.windows.net"
   credential_name = databricks_storage_credential.external_mi.id
+  skip_validation = true
 
   depends_on = [
     databricks_metastore_assignment.main
@@ -136,7 +137,7 @@ resource "databricks_external_location" "gold" {
 resource "databricks_grants" "gold" {
   external_location = databricks_external_location.gold.id
   grant {
-    principal  =  "account users"
+    principal  = "account users"
     privileges = ["CREATE_TABLE", "READ_FILES", "WRITE_FILES"]
   }
 }
@@ -155,7 +156,94 @@ resource "databricks_external_location" "bronze" {
 resource "databricks_grants" "bronze" {
   external_location = databricks_external_location.bronze.id
   grant {
-    principal  =  "account users"
+    principal  = "account users"
     privileges = ["CREATE_TABLE", "READ_FILES", "WRITE_FILES"]
+  }
+}
+
+// Engagements tabke
+// NOTE: This is here because force delete of external location is not supported by Terraform
+// so in order for destroy to work table needs to be managed by Terraform 
+resource "databricks_table" "engagements" {
+  name               = "engagements"
+  catalog_name       = databricks_catalog.main.name
+  schema_name        = databricks_schema.main.name
+  table_type         = "EXTERNAL"
+  storage_location   = "abfss://gold@${var.storage_account_name}.dfs.core.windows.net/engagements"
+  data_source_format = "DELTA"
+
+  depends_on = [
+    databricks_external_location.gold
+  ]
+
+  column {
+    name      = "id"
+    position  = 0
+    type_name = "STRING"
+    type_text = "string"
+    type_json = "{\"name\":\"id\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}}"
+  }
+  column {
+    name      = "user_name"
+    position  = 1
+    type_name = "STRING"
+    type_text = "string"
+    type_json = "{\"name\":\"user_name\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}}"
+  }
+  column {
+    name      = "city"
+    position  = 2
+    type_name = "STRING"
+    type_text = "string"
+    type_json = "{\"name\":\"city\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}}"
+  }
+  column {
+    name      = "pageviews"
+    position  = 3
+    type_name = "LONG"
+    type_text = "bigint"
+    type_json = "{\"name\":\"pageviews\",\"type\":\"long\",\"nullable\":true,\"metadata\":{}}"
+  }
+  column {
+    name      = "orders"
+    position  = 4
+    type_name = "LONG"
+    type_text = "bigint"
+    type_json = "{\"name\":\"orders\",\"type\":\"long\",\"nullable\":true,\"metadata\":{}}"
+  }
+  column {
+    name      = "total_orders_value"
+    position  = 5
+    type_name = "DOUBLE"
+    type_text = "double"
+    type_json = "{\"name\":\"total_orders_value\",\"type\":\"double\",\"nullable\":true,\"metadata\":{}}"
+  }
+  column {
+    name      = "avg_order_value"
+    position  = 6
+    type_name = "DOUBLE"
+    type_text = "double"
+    type_json = "{\"name\":\"avg_order_value\",\"type\":\"double\",\"nullable\":true,\"metadata\":{}}"
+  }
+  column {
+    name      = "total_items"
+    position  = 7
+    type_name = "LONG"
+    type_text = "bigint"
+    type_json = "{\"name\":\"total_items\",\"type\":\"long\",\"nullable\":true,\"metadata\":{}}"
+  }
+  column {
+    name      = "avg_stars"
+    position  = 8
+    type_name = "DOUBLE"
+    type_text = "double"
+    type_json = "{\"name\":\"avg_stars\",\"type\":\"double\",\"nullable\":true,\"metadata\":{}}"
+  }
+  column {
+    name      = "is_vip"
+    position  = 9
+    type_name = "BOOLEAN"
+    type_text = "boolean"
+    type_json = "{\"name\":\"is_vip\",\"type\":\"boolean\",\"nullable\":true,\"metadata\":{}}"
   }
 }
