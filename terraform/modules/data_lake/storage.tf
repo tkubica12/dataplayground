@@ -3,9 +3,9 @@ resource "azurerm_storage_account" "main" {
   name                     = var.name_prefix
   resource_group_name      = var.resource_group_name
   location                 = var.location
-  account_tier             = "Standard"
+  account_tier             = "Premium"
   account_replication_type = "LRS"
-  account_kind             = "StorageV2"
+  account_kind             = "BlockBlobStorage"
   is_hns_enabled           = true
 }
 

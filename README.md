@@ -38,7 +38,7 @@ See [datageneration](datageneration/datageneration.md) for more details.
 - Stream Analytics getting raw pageviews and stars stream to bronze tier as Parquet files
 - Data processed from bronze tier and Azure SQL into Delta Tables in silver tier using DataFlow and Pipeline
 - BI table is generated into gold tier by aggregating data from all sources into Parquet files
-- Simle PowerBI dashboard
+- Simple PowerBI dashboard
 - Stream Analytics enrichment scenarios (output as files to silver tier)
   - Alert on high latency requests
   - Enriching pageviews data with customer information for high latency requests
@@ -65,6 +65,6 @@ TBD:
 TBD:
 - Implement other streaming scenarios (waiting for DLT support for Unity Catalog)
 - Redisign bronze-to-silver to use DLT (waiting for DLT support for Unity Catalog)
-- Visualizations with Dashboard
+- Visualizations with Dashboard (waiting for better API documentation)
 - Incorporate SQL persona, investigate serverless SQL warehouse
 - Leverage AutoML in Databricks

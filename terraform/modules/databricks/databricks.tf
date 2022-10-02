@@ -1,10 +1,14 @@
 // Databricks workspace
 resource "azurerm_databricks_workspace" "main" {
-  name                = var.name_prefix
-  resource_group_name = var.resource_group_name
-  location            = var.location
-  sku                 = "trial"
+  name                        = var.name_prefix
+  resource_group_name         = var.resource_group_name
+  location                    = var.location
+  sku                         = "trial"
   managed_resource_group_name = "data-demo-databricks-solution-dbxinfra"
+
+  custom_parameters {
+    storage_account_sku_name = "Standard_LRS"
+  }
 }
 
 
@@ -31,7 +35,7 @@ resource "databricks_cluster" "shared_cluster" {
   node_type_id            = var.node_sku
   autotermination_minutes = 10
   data_security_mode      = "USER_ISOLATION"
-  num_workers = 1
+  num_workers             = 1
 
   spark_conf = {
     "spark.databricks.io.cache.enabled" : "true"
