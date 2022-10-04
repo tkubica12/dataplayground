@@ -68,3 +68,7 @@ TBD:
 - Visualizations with Dashboard (waiting for better API documentation)
 - Incorporate SQL persona, investigate serverless SQL warehouse
 - Leverage AutoML in Databricks
+
+Inputs - there are few input variables you can pass (see inputs.tf):
+- location (westeurope if not changed)
+- existing_metastore_id (if you want to use existing metastore as currently Databricks supports only one per region, otherwise new one will be created)
