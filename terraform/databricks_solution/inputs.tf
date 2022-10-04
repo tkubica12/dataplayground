@@ -8,3 +8,7 @@ variable "enable_data_factory" {
   default = true
 }
 
+variable "existing_metastore_id" {
+  type = string
+  default = ""
+}

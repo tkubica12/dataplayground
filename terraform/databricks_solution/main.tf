@@ -45,6 +45,7 @@ module "databricks" {
   eventhub_resource_group_name = azurerm_resource_group.main.name
   sql_server_name              = module.data_lake.sql_server_name
   keyvault_id                  = azurerm_key_vault.main.id
+  existing_metastore_id        = var.existing_metastore_id
 
   depends_on = [
     module.data_lake

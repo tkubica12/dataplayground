@@ -1,5 +1,6 @@
 // Metastore
 resource "databricks_metastore" "main" {
+  count = var.existing_metastore_id != "" ? 0 : 1
   name          = "mymetastore"
   storage_root  = "abfss://silver@${var.storage_account_name}.dfs.core.windows.net"
   owner         = "account users"
@@ -10,14 +11,18 @@ resource "databricks_metastore" "main" {
   }
 }
 
+locals {
+  metastore_id = var.existing_metastore_id != "" ? var.existing_metastore_id : databricks_metastore.main[0].id
+}
+
 resource "databricks_metastore_assignment" "main" {
-  metastore_id = databricks_metastore.main.id
+  metastore_id = local.metastore_id
   workspace_id = azurerm_databricks_workspace.main.workspace_id
 }
 
 // Catalog
 resource "databricks_catalog" "main" {
-  metastore_id  = databricks_metastore.main.id
+  metastore_id  = local.metastore_id
   name          = "mycatalog"
   force_destroy = true
 
@@ -93,7 +98,7 @@ resource "azurerm_role_assignment" "main" {
 
 // Metastore to use managed identity access connector
 resource "databricks_metastore_data_access" "main" {
-  metastore_id = databricks_metastore.main.id
+  metastore_id = local.metastore_id
   name         = "dataaccess"
 
   azure_managed_identity {

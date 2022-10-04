@@ -50,3 +50,8 @@ variable "sql_server_name" {
 variable "keyvault_id" {
   type = string
 }
+
+variable "existing_metastore_id" {
+  type = string
+  default = ""
+}
