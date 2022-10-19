@@ -98,6 +98,7 @@ resource "azurerm_role_assignment" "main" {
 
 // Metastore to use managed identity access connector
 resource "databricks_metastore_data_access" "main" {
+  count = var.existing_metastore_id != "" ? 0 : 1
   metastore_id = local.metastore_id
   name         = "dataaccess"
 
