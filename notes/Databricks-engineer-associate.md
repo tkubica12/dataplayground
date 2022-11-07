@@ -148,6 +148,11 @@ CREATE OR REPLACE TEMPORARY VIEW recordings_w_pii AS (
       .table("recordings_enriched"))
 ```
 
+Triggers
+- processingTime='10 seconds' (repeat every ...)
+- once=True (process all new data in single batch)
+- availableNow=True (process all new data in multiple batches)
+
 ## Full pipeline - delta live tables
 Integrated solution that manages its own cluster, error handling, you can put targets for data quality and actions (report aka nothing, drop, fail with CONSTRAINT .. EXPECT .. ON VIOLATION)
 
