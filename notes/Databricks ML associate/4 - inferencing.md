@@ -39,3 +39,36 @@ Note this is where Azure ML might provide more robust solution:
 - Supports other formats such as Triton for high-performance serving including GPU accelerated inferencing using TensorFlow, ONNX Runtime, PyTorch or NVIDIA TensorRT
 - Easily deploy ONNX models
 - Prebuild and maintained Docker images for serving models for running models anywhere (IoT edge, on-prem, cloud)
+
+## Streaming example
+You can call transform method on streaming table.
+
+```python
+# Get stream
+streaming_data = (spark
+                 .readStream
+                 .schema(schema) # Can set the schema this way
+                 .option("maxFilesPerTrigger", 1)
+                 .parquet(repartitioned_path))
+
+# Score stream
+stream_pred = pipeline_model.transform(streaming_data)
+
+# Export stream
+import re
+
+checkpoint_dir = f"{DA.paths.working_dir}/stream_checkpoint"
+# Clear out the checkpointing directory
+dbutils.fs.rm(checkpoint_dir, True) 
+
+query = (stream_pred.writeStream
+                    .format("memory")
+                    .option("checkpointLocation", checkpoint_dir)
+                    .outputMode("append")
+                    .queryName("pred_stream")
+                    .start())
+
+# Read data
+%sql 
+select * from pred_stream
+```
