@@ -1,3 +1,22 @@
+- [Algorithms](#algorithms)
+  - [Linear regression](#linear-regression)
+  - [Decision tree](#decision-tree)
+  - [Random forest](#random-forest)
+  - [Gradient Boosting trees](#gradient-boosting-trees)
+- [Training](#training)
+- [Save model](#save-model)
+- [Hyperparameter tuning](#hyperparameter-tuning)
+  - [ParamGridBuilder](#paramgridbuilder)
+  - [Cross validation](#cross-validation)
+  - [HyperOpt](#hyperopt)
+- [Model evaluation](#model-evaluation)
+  - [Common metrics](#common-metrics)
+  - [Linear Regression - get coefficients and intercept](#linear-regression---get-coefficients-and-intercept)
+  - [Evaluate regression model](#evaluate-regression-model)
+  - [Evaluate classification model](#evaluate-classification-model)
+- [AutoML](#automl)
+
+
 # Algorithms
 ## Linear regression
 y = ax + b
@@ -8,6 +27,10 @@ y = ax + b
 - Easy to tune (less worry about overfitting etc.)
 - Not accurate for complex problems
 - We need to convert categorical values to OHE (dummy variables) - not just indexer, because such numbers have no numerical meanings (if 1=cat, 2=dog, 3=mouse, it does not mean that dog is more than cat but less then mouse)
+
+```python
+lr = Lin
+```
 
 ## Decision tree
 - Tree of binary (true/false) decisions such as feature1 below or above median and so on
@@ -21,6 +44,10 @@ y = ax + b
 - Few hyperparameters to tune
 - In MLLib we still need to convert all features to vector, but we will not use OHE (just indexer)
 
+```python
+dt = DecisionTreeRegressor(labelCol="price")
+```
+
 ## Random forest
 - Create multiple decision trees and average their predictions
 - Key is to create trees that are different from each other (uncorrelated)
@@ -31,6 +58,36 @@ y = ax + b
   - Max depth (maxDepth in MLLib, max_depth in sklearn)
   - Max bins (maxBins in MLLib, not in sklearn and it is not distributed)
   - Max features (featureSubsetStrategy in MLLib, max_features in sklearn)
+
+```python
+rf = RandomForestRegressor(labelCol="price", maxBins=40)
+```
+
+## Gradient Boosting trees
+ - Create multiple (simple, called "weak learner") decision trees and combine them in sequence where each tree tries to correct errors of previous tree (residuals of previous tree is label for next tree)
+ - y = a*tree1(x) + b*tree2(x) + c*tree3(x) + ...
+ - We only add new tree to the model as long as gradient is closer to zero (slope is less steep, so we are closer to minimum)
+ - Pretty similar to gradient descent used in deep learning
+ - Can overfit easily
+ - Somewhat between Linear Regression and Deep Neural Networks because it:
+   - Can achieve good performance in quite complex problems (closer to DNNs)
+   - For complex yet structured data try GBT first, for unstructured problems like vision/pixels, try DNNs first
+   - It is still easier to compute than DNNs (cheaper, faster learning), but hard to parallelize
+   - Interpretability is no longer as good as LR
+   - XGBoost is the most popular implementation of GBT
+   - LightGBM by Microsoft - faster especially for larger datasets, but can more easily overfit (it produces more complex trees)
+
+```python
+from sparkdl.xgboost import XgboostRegressor
+from pyspark.ml import Pipeline
+
+params = {"n_estimators": 100, "learning_rate": 0.1, "max_depth": 4, "random_state": 42, "missing": 0}
+
+xgboost = XgboostRegressor(**params)
+
+pipeline = Pipeline(stages=[string_indexer, vec_assembler, xgboost])
+pipeline_model = pipeline.fit(train_df)
+```
 
 # Training
 First we need to declare model, in this example LiearRegression, where we need to specify features and label.
@@ -63,6 +120,65 @@ pipeline = Pipeline(stages=stages)
 pipeline_model = pipeline.fit(train_df)
 ```
 
+Most examples here are using MLLib (Spark ML) which is distributed, but for small problems we can use sklearn (will run on driver). Spark 3.0 is adding features to accelerate this. Eg. Pandas can be loaded as Pandas UDF that uses Apache Arrow to efficiently pass data (100x faster than row-at-time Python UDFs). Also supports iterator so it can be efficient in batches. Recently support was added to call Pandas function API directly on PySpark DataFrame.
+
+```python
+# Train
+import mlflow.sklearn
+import pandas as pd
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import train_test_split
+
+with mlflow.start_run(run_name="sklearn-random-forest") as run:
+    # Enable autologging 
+    mlflow.sklearn.autolog(log_input_examples=True, log_model_signatures=True, log_models=True)
+    # Import the data
+    df = pd.read_csv(f"{DA.paths.datasets}/airbnb/sf-listings/airbnb-cleaned-mlflow.csv".replace("dbfs:/", "/dbfs/")).drop(["zipcode"], axis=1)
+    X_train, X_test, y_train, y_test = train_test_split(df.drop(["price"], axis=1), df[["price"]].values.ravel(), random_state=42)
+
+    # Create model
+    rf = RandomForestRegressor(n_estimators=100, max_depth=10, random_state=42)
+    rf.fit(X_train, y_train)
+
+# Load efficiently data from Pandas to Spark DataFrame 
+spark_df = spark.createDataFrame(X_test)
+from typing import Iterator, Tuple
+
+@pandas_udf("double")
+def predict(iterator: Iterator[pd.DataFrame]) -> Iterator[pd.Series]:
+    model_path = f"runs:/{run.info.run_id}/model" 
+    model = mlflow.sklearn.load_model(model_path) # Load model
+    for features in iterator:
+        pdf = pd.concat(features, axis=1)
+        yield pd.Series(model.predict(pdf))
+
+prediction_df = spark_df.withColumn("prediction", predict(*spark_df.columns))
+display(prediction_df)
+
+# Directly calling Pandas API on PySpark DataFrame
+def predict(iterator: Iterator[pd.DataFrame]) -> Iterator[pd.DataFrame]:
+    model_path = f"runs:/{run.info.run_id}/model" 
+    model = mlflow.sklearn.load_model(model_path) # Load model
+    for features in iterator:
+        yield pd.concat([features, pd.Series(model.predict(features), name="prediction")], axis=1)
+    
+display(spark_df.mapInPandas(predict, """`host_total_listings_count` DOUBLE,`neighbourhood_cleansed` BIGINT,`latitude` DOUBLE,`longitude` DOUBLE,`property_type` BIGINT,`room_type` BIGINT,`accommodates` DOUBLE,`bathrooms` DOUBLE,`bedrooms` DOUBLE,`beds` DOUBLE,`bed_type` BIGINT,`minimum_nights` DOUBLE,`number_of_reviews` DOUBLE,`review_scores_rating` DOUBLE,`review_scores_accuracy` DOUBLE,`review_scores_cleanliness` DOUBLE,`review_scores_checkin` DOUBLE,`review_scores_communication` DOUBLE,`review_scores_location` DOUBLE,`review_scores_value` DOUBLE, `prediction` DOUBLE""")) 
+```
+
+# Save model
+Saving and loading model
+
+```python
+# Save model to storage
+pipeline_model.write().overwrite().save(directory_path)
+
+# Load model from storage
+from pyspark.ml import PipelineModel
+saved_pipeline_model = PipelineModel.load(directory_path)
+```
+
+Most of the time we will use MLflow to track models and save to registry - see MLFlow section.
+
 # Hyperparameter tuning
 
 ## ParamGridBuilder
@@ -91,6 +207,71 @@ What we do:
 ```python
 from pyspark.ml.tuning import CrossValidator
 cv = CrossValidator(estimator=rf, evaluator=evaluator, estimatorParamMaps=param_grid, numFolds=3, seed=42)
+```
+
+## HyperOpt
+Framework for advanced hyperparameter tuning. Instead of discrete values (like in ParamGrid) we can specify ranges and algorithm is using various techniques to find best values. Also HyperOpt is trying to parallelize the process using SparkTrials - eg. it can run multiple models in parallel on different machines.
+
+```python
+def objective_function(params):    
+    # set the hyperparameters that we want to tune
+    max_depth = params["max_depth"]
+    num_trees = params["num_trees"]
+
+    with mlflow.start_run():
+        estimator = pipeline.copy({rf.maxDepth: max_depth, rf.numTrees: num_trees})
+        model = estimator.fit(train_df)
+
+        preds = model.transform(val_df)
+        rmse = regression_evaluator.evaluate(preds)
+        mlflow.log_metric("rmse", rmse)
+
+    return rms
+
+from hyperopt import hp
+
+search_space = {
+    "max_depth": hp.quniform("max_depth", 2, 5, 1),
+    "num_trees": hp.quniform("num_trees", 10, 100, 1)
+}
+
+from hyperopt import fmin, tpe, Trials
+import numpy as np
+import mlflow
+import mlflow.spark
+mlflow.pyspark.ml.autolog(log_models=False)
+
+num_evals = 4
+trials = Trials()
+best_hyperparam = fmin(fn=objective_function, 
+                       space=search_space,
+                       algo=tpe.suggest, 
+                       max_evals=num_evals,
+                       trials=trials,
+                       rstate=np.random.default_rng(42))
+
+# Retrain model on train & validation dataset and evaluate on test dataset
+with mlflow.start_run():
+    best_max_depth = best_hyperparam["max_depth"]
+    best_num_trees = best_hyperparam["num_trees"]
+    estimator = pipeline.copy({rf.maxDepth: best_max_depth, rf.numTrees: best_num_trees})
+    combined_df = train_df.union(val_df) # Combine train & validation together
+
+    pipeline_model = estimator.fit(combined_df)
+    pred_df = pipeline_model.transform(test_df)
+    rmse = regression_evaluator.evaluate(pred_df)
+
+    # Log param and metrics for the final model
+    mlflow.log_param("maxDepth", best_max_depth)
+    mlflow.log_param("numTrees", best_num_trees)
+    mlflow.log_metric("rmse", rmse)
+    mlflow.spark.log_model(pipeline_model, "model")
+```
+
+fmin() with parallelization
+
+```python
+spark_trials = SparkTrials(parallelism=2)
 ```
 
 # Model evaluation
@@ -158,60 +339,13 @@ from pyspark.ml.evaluation import BinaryClassificationEvaluator, MulticlassClass
 evaluator = BinaryClassificationEvaluator(labelCol="priceClass", rawPredictionCol="rawPrediction", metricName="areaUnderROC")
 ```
 
-## Cross Validation
-
-------
-Creating dummy variables (one-hot encoding) for categorical features
+# AutoML
+Automatically try different algorithms and hyperparameters to find best model. It is using SparkTrials to parallelize the process. Currently it does utilize lightgbm, sklearn and xgboost - so no DNNs.
 
 ```python
-from pyspark.ml.feature import OneHotEncoder, StringIndexer
+from databricks import automl
 
-# Get columns of type string
-categorical_cols = [field for (field, dataType) in train_df.dtypes if dataType == "string"]
-
-# Create name for categorical columns - one for index, one for OHE
-index_output_cols = [x + "Index" for x in categorical_cols]
-ohe_output_cols = [x + "OHE" for x in categorical_cols]
-
-# Assign index to each category
-string_indexer = StringIndexer(inputCols=categorical_cols, outputCols=index_output_cols, handleInvalid="skip")
-
-# Convert category index to binary vector (dummy variables)
-ohe_encoder = OneHotEncoder(inputCols=index_output_cols, outputCols=ohe_output_cols)
-
-# Create vector of features (numerical + categorical)
-from pyspark.ml.feature import VectorAssembler
-
-numeric_cols = [field for (field, dataType) in train_df.dtypes if ((dataType == "double") & (field != "price"))]
-assembler_inputs = ohe_output_cols + numeric_cols
-vec_assembler = VectorAssembler(inputCols=assembler_inputs, outputCol="features")
-
-# Create model
-from pyspark.ml.regression import LinearRegression
-
-lr = LinearRegression(labelCol="price", featuresCol="features")
+summary = automl.regress(train_df, target_col="price", primary_metric="rmse", timeout_minutes=5, max_trials=10)
 ```
 
-To have flexibility to define transformations in any order and have single place where ordering is decided, we can use pipeline.
-
-```python
-from pyspark.ml import Pipeline
-
-# Define pipeline
-stages = [string_indexer, ohe_encoder, vec_assembler, lr]
-pipeline = Pipeline(stages=stages)
-
-# Train
-pipeline_model = pipeline.fit(train_df)
-```
-
-Saving and loading model
-
-```python
-# Save model to storage
-pipeline_model.write().overwrite().save(directory_path)
-
-# Load model from storage
-from pyspark.ml import PipelineModel
-saved_pipeline_model = PipelineModel.load(directory_path)
-```
+In UI you will find automl experiment with all runds. Each run has its own generated notebook so you can look at "source code". 

@@ -1,3 +1,8 @@
+- [Delta in Python](#delta-in-python)
+- [Data preparation](#data-preparation)
+- [Data split](#data-split)
+  - [Random split 80/20](#random-split-8020)
+
 # Delta in Python
 
 ```python
