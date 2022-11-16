@@ -120,50 +120,6 @@ pipeline = Pipeline(stages=stages)
 pipeline_model = pipeline.fit(train_df)
 ```
 
-Most examples here are using MLLib (Spark ML) which is distributed, but for small problems we can use sklearn (will run on driver). Spark 3.0 is adding features to accelerate this. Eg. Pandas can be loaded as Pandas UDF that uses Apache Arrow to efficiently pass data (100x faster than row-at-time Python UDFs). Also supports iterator so it can be efficient in batches. Recently support was added to call Pandas function API directly on PySpark DataFrame.
-
-```python
-# Train
-import mlflow.sklearn
-import pandas as pd
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.model_selection import train_test_split
-
-with mlflow.start_run(run_name="sklearn-random-forest") as run:
-    # Enable autologging 
-    mlflow.sklearn.autolog(log_input_examples=True, log_model_signatures=True, log_models=True)
-    # Import the data
-    df = pd.read_csv(f"{DA.paths.datasets}/airbnb/sf-listings/airbnb-cleaned-mlflow.csv".replace("dbfs:/", "/dbfs/")).drop(["zipcode"], axis=1)
-    X_train, X_test, y_train, y_test = train_test_split(df.drop(["price"], axis=1), df[["price"]].values.ravel(), random_state=42)
-
-    # Create model
-    rf = RandomForestRegressor(n_estimators=100, max_depth=10, random_state=42)
-    rf.fit(X_train, y_train)
-
-# Load efficiently data from Pandas to Spark DataFrame 
-spark_df = spark.createDataFrame(X_test)
-from typing import Iterator, Tuple
-
-@pandas_udf("double")
-def predict(iterator: Iterator[pd.DataFrame]) -> Iterator[pd.Series]:
-    model_path = f"runs:/{run.info.run_id}/model" 
-    model = mlflow.sklearn.load_model(model_path) # Load model
-    for features in iterator:
-        pdf = pd.concat(features, axis=1)
-        yield pd.Series(model.predict(pdf))
-
-prediction_df = spark_df.withColumn("prediction", predict(*spark_df.columns))
-display(prediction_df)
-
-# Directly calling Pandas API on PySpark DataFrame
-def predict(iterator: Iterator[pd.DataFrame]) -> Iterator[pd.DataFrame]:
-    model_path = f"runs:/{run.info.run_id}/model" 
-    model = mlflow.sklearn.load_model(model_path) # Load model
-    for features in iterator:
-        yield pd.concat([features, pd.Series(model.predict(features), name="prediction")], axis=1)
-    
-display(spark_df.mapInPandas(predict, """`host_total_listings_count` DOUBLE,`neighbourhood_cleansed` BIGINT,`latitude` DOUBLE,`longitude` DOUBLE,`property_type` BIGINT,`room_type` BIGINT,`accommodates` DOUBLE,`bathrooms` DOUBLE,`bedrooms` DOUBLE,`beds` DOUBLE,`bed_type` BIGINT,`minimum_nights` DOUBLE,`number_of_reviews` DOUBLE,`review_scores_rating` DOUBLE,`review_scores_accuracy` DOUBLE,`review_scores_cleanliness` DOUBLE,`review_scores_checkin` DOUBLE,`review_scores_communication` DOUBLE,`review_scores_location` DOUBLE,`review_scores_value` DOUBLE, `prediction` DOUBLE""")) 
-```
 
 # Save model
 Saving and loading model
