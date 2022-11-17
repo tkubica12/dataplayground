@@ -3,6 +3,10 @@
   - [Decision tree](#decision-tree)
   - [Random forest](#random-forest)
   - [Gradient Boosting trees](#gradient-boosting-trees)
+  - [K-Means (not in scope)](#k-means-not-in-scope)
+  - [Logistic regression (not in scope)](#logistic-regression-not-in-scope)
+  - [Time Series Forecasting (not in scope)](#time-series-forecasting-not-in-scope)
+  - [Deep Learning (not in scope)](#deep-learning-not-in-scope)
 - [Training](#training)
 - [Save model](#save-model)
 - [Hyperparameter tuning](#hyperparameter-tuning)
@@ -88,6 +92,52 @@ xgboost = XgboostRegressor(**params)
 pipeline = Pipeline(stages=[string_indexer, vec_assembler, xgboost])
 pipeline_model = pipeline.fit(train_df)
 ```
+
+## K-Means (not in scope)
+- Simples example of unsupervised learning clustering -> finds groups of similar data points
+- Steps:
+  - Randomly selects point as centroid of cluster
+  - Assign data points to clusters (find closest centroid)
+  - Tak data points in cluster and using squared distance calculate position of their mean (new centroid)
+  - Repeat process (some data points now belong to different cluster)
+  - Stop when centroid positions no longer change
+- Very fast, but too simple
+- Number of clusters need to be specified
+- Will fail to find clusters with cimplex shapes, interlaced clusters etc.
+- Other methods: DBSCAN (best results, but slower), MeanShift, Spectral Clustering
+- In MLLib we need to convert features to column with dense vector
+
+```python
+from pyspark.ml.clustering import KMeans
+
+kmeans = KMeans(k=3, seed=221, maxIter=20)
+model = kmeans.fit(iris_two_features_df)
+```
+
+## Logistic regression (not in scope)
+
+## Time Series Forecasting (not in scope)
+
+## Deep Learning (not in scope)
+Using different courses to learn this, so just few notes for reference. 
+- Deep Neural Networks use neurons as basic building block. 
+- Neuron takes inputs (from input layer or previous layer neurons) where each input "importance" is influenced by weight (multiplication) and bias (shift in value). 
+- Output from neuron is often recalculated by activation function
+  - Sigmoid provides output between 0 and 1 while flattens as you get closer to 0 or 1 (makes it less sensitive to extremes)
+  - Tanh provides output between -1 and 1, centered on 0, flattens extremes
+  - ReLU is lienar for values over 0, but "resets" everything bellow 0 to 0. Leaky ReLU is similar, but bellow 0 is not fixed to 0, but to low slope negatives
+  - Softmax is for last layer to get probability between 0 to 1 (classification)
+- Topology is input layer, one or more hidden layers, output layer
+- Some networks are dense (each neuron in one layer is connect to all neuron outputs in previous layer), some are sparse
+- Gradient descent is used to find right values for weights and biases, learning rate is how big steps it is taking
+- Common types
+  - Deep Neural Networks (densly connected) - great for regression, classification
+  - Convolutional Neural Networks (CNN) - great for image recognition, video recognition. Main idea is that model goes from high number of dimensions (many pixels) in a way, that just kernel (eg. 3x3) is used to calculate otput and padding is used to scan full image. This way model extracts very basic features in first layers (edges, lines), but more and more advanced features in later layers (eyes, nose, mount). Then result is flattened and passed to fully connected layers for classification.
+  - Recurrent Neural Networks (RNN) - great for time series forecasting, text generation, speech recognition. Main idea is that model has memory, so it can remember what it has seen before. This is achieved by passing output from previous layer to next layer. This way model can learn to predict next word in sentence, or next value in time series. LTSM and GRU are variants with more memory so can produce better results for longer sequences.
+  - Encoder/Decoder is firstly reducing dimensions and then expanding. Both are trained separately.Transformers are very advanced and are basis for a lot of language oriented tasks such as GPT-3 in GitHub Copilot.
+  - Generative models - two models compete with each other. One is creating fake images (and never see actual real image such as picture of human) while second one is detective trying to recognize fake ones among real ones. Because both learn and advance fake generator is getting better. Often used to generate fake images of people or cats, but can also generate text or music.
+- Reinforcement Learning - agent is not passive, but needs to take actions and gets rewards and punishments. Often used in gaming, but in future also in robotics or self-driving. Can be used when there are no training data available, but it is difficult to create goog reward function (end goal might by too far so RL will never gain any points, but providing dense rewards with subgoals can lead to unwanted behavior). Also computationally intensive, time consuming and problematic, when actions can have real consequences (eg. self-driving car using trial and error and be sorry when kills human, that is why RL in self-driving is rather used in simulations, not during actual driving).
+
 
 # Training
 First we need to declare model, in this example LiearRegression, where we need to specify features and label.
