@@ -117,6 +117,33 @@ model = kmeans.fit(iris_two_features_df)
 ## Logistic regression (not in scope)
 
 ## Time Series Forecasting (not in scope)
+Types
+- Univariate - one feature (eg. weight)
+- Multivariate - similar to regression with multiple features (eg. acceleration data from gyroscop on 3 axes)
+  
+Algorithms
+- Prophet (by Facebook) - very easy to use, good results
+- ARIMA - best results, but hard to tune (3 hyperparameters - d, p, q)
+- Exponential Smoothing
+- LTSM (Long Short Term Memory) - neural model - slow to train and typically poor results where ARIMA is good, use when problem is too complex for ARIMA
+
+```python
+# Prophet
+import pandas as pd
+from fbprophet import Prophet
+
+prophet_df = pd.DataFrame()  # Empty dataframe
+prophet_df["ds"] = pd.to_datetime(df["date"])   # Timestamp from measurements
+prophet_df["y"] = df["confirmed"]    # Time series from measurements
+prophet_obj = Prophet()
+prophet_obj.fit(prophet_df)
+prophet_future = prophet_obj.make_future_dataframe(periods=30)  # Add 30 "timeslots"
+prophet_future.tail()
+prophet_forecast = prophet_obj.predict(prophet_future)
+prophet_forecast[['ds', 'yhat']]   # predictions are in yhat column
+prophet_plot = prophet_obj.plot(prophet_forecast)   # plot graph
+prophet_plot2 = prophet_obj.plot_components(prophet_forecast)  # plot graph seasonality details
+```
 
 ## Deep Learning (not in scope)
 Using different courses to learn this, so just few notes for reference. 
