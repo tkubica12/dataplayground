@@ -1,5 +1,5 @@
 - [Algorithms](#algorithms)
-  - [Linear regression](#linear-regression)
+  - [Linear regression and Logistic regression](#linear-regression-and-logistic-regression)
   - [Decision tree](#decision-tree)
   - [Random forest](#random-forest)
   - [Gradient Boosting trees](#gradient-boosting-trees)
@@ -22,10 +22,11 @@
 
 
 # Algorithms
-## Linear regression
+## Linear regression and Logistic regression
 y = ax + b
 
-- Predicts continuous values such as price
+- Liner regression predicts continuous values such as price
+- Logistic regression predicts distinct label values such as 0 or 1 (spam or not spam)
 - Simple, fast to train, can be paralellized with MLLib in Spark
 - Easy to interpret - coefficients (weights) of features tell about how model works
 - Easy to tune (less worry about overfitting etc.)
@@ -33,7 +34,11 @@ y = ax + b
 - We need to convert categorical values to OHE (dummy variables) - not just indexer, because such numbers have no numerical meanings (if 1=cat, 2=dog, 3=mouse, it does not mean that dog is more than cat but less then mouse)
 
 ```python
-lr = Lin
+# Regression 
+lr = LinearRegression(featuresCol="features", labelCol="price")
+
+# Classification
+lr = LogisticRegression(regParam=0.1, elasticNetParam=1.0, family="multinomial")
 ```
 
 ## Decision tree
@@ -201,6 +206,60 @@ pipeline = Pipeline(stages=stages)
 pipeline_model = pipeline.fit(train_df)
 ```
 
+Here is why pipelines simplify things - similar solution without pipeline would require to do all steps manually:
+
+```python
+# Prepare column names
+from pyspark.ml.feature import OneHotEncoder, StringIndexer
+
+categorical_cols = [field for (field, dataType) in train_df.dtypes if dataType == "string"]
+index_output_cols = [x + "Index" for x in categorical_cols]
+ohe_output_cols = [x + "OHE" for x in categorical_cols]
+
+# Index strings
+string_indexer = StringIndexer(inputCols=categorical_cols, outputCols=index_output_cols, handleInvalid="skip")
+step1_indexer_df_train = string_indexer.fit(train_df).transform(train_df)
+display(step1_indexer_df_train)
+
+# Dummy vars
+ohe_encoder = OneHotEncoder(inputCols=index_output_cols, outputCols=ohe_output_cols)
+step2_ohe_df_train = ohe_encoder.fit(step1_indexer_df_train).transform(step1_indexer_df_train)
+display(step2_ohe_df_train)
+
+# Vector assembler
+from pyspark.ml.feature import VectorAssembler
+
+numeric_cols = [field for (field, dataType) in train_df.dtypes if ((dataType == "double") & (field != "price"))]
+assembler_inputs = ohe_output_cols + numeric_cols
+vec_assembler = VectorAssembler(inputCols=assembler_inputs, outputCol="features")
+
+step3_vector_df_train = vec_assembler.transform(step2_ohe_df_train)
+display(step3_vector_df_train)
+
+# Linear regression
+from pyspark.ml.regression import LinearRegression
+
+lr = LinearRegression(labelCol="price", featuresCol="features")
+model = lr.fit(step3_vector_df_train)
+
+# Evaluate
+step1_indexer_df_test = string_indexer.fit(train_df).transform(test_df)
+step2_ohe_df_test = ohe_encoder.fit(step1_indexer_df_test).transform(step1_indexer_df_test)
+step3_vector_df_test = vec_assembler.transform(step2_ohe_df_test)
+
+pred_df = model.transform(step3_vector_df_test)
+
+from pyspark.ml.evaluation import RegressionEvaluator
+
+regression_evaluator = RegressionEvaluator(predictionCol="prediction", labelCol="price", metricName="rmse")
+
+rmse = regression_evaluator.evaluate(pred_df)
+r2 = regression_evaluator.setMetricName("r2").evaluate(pred_df)
+mse = regression_evaluator.setMetricName("mse").evaluate(pred_df)
+print(f"RMSE is {rmse}")
+print(f"MSE is {mse}")
+print(f"R2 is {r2}")
+```
 
 # Save model
 Saving and loading model
@@ -243,7 +302,24 @@ What we do:
 
 ```python
 from pyspark.ml.tuning import CrossValidator
+
+evaluator = MulticlassClassificationEvaluator(metricName="accuracy")
+
+# Option 1 - make cv part of pipeline
 cv = CrossValidator(estimator=rf, evaluator=evaluator, estimatorParamMaps=param_grid, numFolds=3, seed=42)
+
+pipeline = Pipeline(stages=[r_formula, cv])
+pipeline_model = pipeline.fit(train_df)
+pred_df = pipeline_model.transform(test_df)
+
+# Option 2 - use pipeline as part of cv
+pipeline = Pipeline(stages=[r_formula, lr])
+
+cv = CrossValidator(estimator=pipeline, evaluator=evaluator, estimatorParamMaps=param_grid, numFolds=3, seed=42)
+model = cv.fit(train_df)
+pred_df = model.transform(test_df)
+
+list(zip(model.getEstimatorParamMaps(), model.avgMetrics))
 ```
 
 ## HyperOpt
