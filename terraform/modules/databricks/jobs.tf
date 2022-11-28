@@ -1,4 +1,3 @@
-// Jobs
 resource "databricks_job" "data_lake_loader" {
   name = "data_lake_loader"
 
