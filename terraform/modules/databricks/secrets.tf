@@ -24,3 +24,15 @@ resource "databricks_secret" "eventhub_namespace_name" {
   string_value = var.eventhub_namespace_name
   scope        = databricks_secret_scope.azure.id
 }
+
+resource "databricks_secret" "eventhub_pages_key" {
+  key          = "eventhub_pages_key"
+  string_value = azurerm_eventhub_authorization_rule.pageviewsReceiver.primary_key
+  scope        = databricks_secret_scope.azure.id
+}
+
+resource "databricks_secret" "eventhub_stars_key" {
+  key          = "eventhub_stars_key"
+  string_value = azurerm_eventhub_authorization_rule.starsReceiver.primary_key
+  scope        = databricks_secret_scope.azure.id
+}
