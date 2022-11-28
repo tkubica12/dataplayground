@@ -35,7 +35,7 @@ resource "databricks_grants" "df_identity_access" {
   catalog = databricks_catalog.main.name
   grant {
     principal  = "account users"
-    privileges = ["USAGE", "CREATE"]
+    privileges = ["USAGE", "CREATE", "CREATE_SCHEMA", "USE_CATALOG"]
   }
 }
 
@@ -43,7 +43,7 @@ resource "databricks_grants" "df_identity_access_schema" {
   schema = "${databricks_catalog.main.name}.${databricks_schema.main.name}"
   grant {
     principal  = "account users"
-    privileges = ["USAGE", "CREATE"]
+    privileges = ["USAGE", "CREATE", "CREATE_FUNCTION", "CREATE_TABLE", "CREATE_VIEW", "USE_SCHEMA"]
   }
 }
 
@@ -144,7 +144,7 @@ resource "databricks_grants" "gold" {
   external_location = databricks_external_location.gold.id
   grant {
     principal  = "account users"
-    privileges = ["CREATE_TABLE", "READ_FILES", "WRITE_FILES"]
+    privileges = ["CREATE_TABLE", "CREATE_EXTERNAL_TABLE", "READ_FILES", "WRITE_FILES"]
   }
 }
 
@@ -163,7 +163,7 @@ resource "databricks_grants" "bronze" {
   external_location = databricks_external_location.bronze.id
   grant {
     principal  = "account users"
-    privileges = ["CREATE_TABLE", "READ_FILES", "WRITE_FILES"]
+    privileges = ["CREATE_TABLE", "CREATE_EXTERNAL_TABLE", "READ_FILES", "WRITE_FILES"]
   }
 }
 
