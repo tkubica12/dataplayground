@@ -1,103 +1,73 @@
-// Jobs
-resource "databricks_job" "data_lake_loader" {
-  name = "data_lake_loader"
 
-  existing_cluster_id = databricks_cluster.single_user_cluster.id
+# // BRONZE-to-SILVER: Users, VIP users, products
+# locals {
+#   data_lake_loader = <<CONTENT
+# # Databricks notebook source
+# # MAGIC %md
+# # MAGIC # Users
 
-  schedule {
-    quartz_cron_expression = "0 */50 * ? * *"
-    timezone_id            = "UTC"
-  }
+# # COMMAND ----------
 
-  notebook_task {
-    notebook_path = databricks_notebook.data_lake_loader.id
-  }
-}
+# data_path = "abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/users/"
+# checkpoint_path = "abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/_checkpoint/users"
 
-resource "databricks_job" "sql_loader" {
-  name = "sql_loader"
+# (spark.readStream
+#   .format("cloudFiles")
+#   .option("cloudFiles.format", "json")
+#   .option("cloudFiles.schemaLocation", checkpoint_path)
+#   .load(data_path)
+#   .writeStream
+#   .option("checkpointLocation", checkpoint_path)
+#   .trigger(availableNow=True)
+#   .toTable("mycatalog.mydb.users"))
 
-  existing_cluster_id = databricks_cluster.single_user_cluster.id
+# # COMMAND ----------
 
-  schedule {
-    quartz_cron_expression = "0 */50 * ? * *"
-    timezone_id            = "UTC"
-  }
+# # MAGIC %md
+# # MAGIC # VIP Users
 
-  notebook_task {
-    notebook_path = databricks_notebook.sql_loader.id
-  }
-}
+# # COMMAND ----------
 
-// BRONZE-to-SILVER: Users, VIP users, products
-locals {
-  data_lake_loader = <<CONTENT
-# Databricks notebook source
-# MAGIC %md
-# MAGIC # Users
+# data_path = "abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/vipusers/"
+# checkpoint_path = "abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/_checkpoint/vipusers"
 
-# COMMAND ----------
+# (spark.readStream
+#   .format("cloudFiles")
+#   .option("cloudFiles.format", "json")
+#   .option("cloudFiles.schemaLocation", checkpoint_path)
+#   .load(data_path)
+#   .writeStream
+#   .option("checkpointLocation", checkpoint_path)
+#   .trigger(availableNow=True)
+#   .toTable("mycatalog.mydb.vipusers"))
 
-data_path = "abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/users/"
-checkpoint_path = "abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/_checkpoint/users"
+# # COMMAND ----------
 
-(spark.readStream
-  .format("cloudFiles")
-  .option("cloudFiles.format", "json")
-  .option("cloudFiles.schemaLocation", checkpoint_path)
-  .load(data_path)
-  .writeStream
-  .option("checkpointLocation", checkpoint_path)
-  .trigger(availableNow=True)
-  .toTable("mycatalog.mydb.users"))
+# # MAGIC %md
+# # MAGIC # Products
 
-# COMMAND ----------
+# # COMMAND ----------
 
-# MAGIC %md
-# MAGIC # VIP Users
+# data_path = "abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/products/"
+# checkpoint_path = "abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/_checkpoint/products"
 
-# COMMAND ----------
+# (spark.readStream
+#   .format("cloudFiles")
+#   .option("cloudFiles.format", "json")
+#   .option("cloudFiles.schemaLocation", checkpoint_path)
+#   .load(data_path)
+#   .writeStream
+#   .option("checkpointLocation", checkpoint_path)
+#   .trigger(availableNow=True)
+#   .toTable("mycatalog.mydb.products"))
+# CONTENT
+# }
 
-data_path = "abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/vipusers/"
-checkpoint_path = "abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/_checkpoint/vipusers"
-
-(spark.readStream
-  .format("cloudFiles")
-  .option("cloudFiles.format", "json")
-  .option("cloudFiles.schemaLocation", checkpoint_path)
-  .load(data_path)
-  .writeStream
-  .option("checkpointLocation", checkpoint_path)
-  .trigger(availableNow=True)
-  .toTable("mycatalog.mydb.vipusers"))
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC # Products
-
-# COMMAND ----------
-
-data_path = "abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/products/"
-checkpoint_path = "abfss://bronze@${var.storage_account_name}.dfs.core.windows.net/_checkpoint/products"
-
-(spark.readStream
-  .format("cloudFiles")
-  .option("cloudFiles.format", "json")
-  .option("cloudFiles.schemaLocation", checkpoint_path)
-  .load(data_path)
-  .writeStream
-  .option("checkpointLocation", checkpoint_path)
-  .trigger(availableNow=True)
-  .toTable("mycatalog.mydb.products"))
-CONTENT
-}
-
-resource "databricks_notebook" "data_lake_loader" {
-  content_base64 = base64encode(local.data_lake_loader)
-  language       = "PYTHON"
-  path           = "/Shared/data_lake_loader"
-}
+# resource "databricks_notebook" "data_lake_loader" {
+#   content_base64 = base64encode(local.data_lake_loader)
+#   language       = "PYTHON"
+#   path           = "/Shared/data_lake_loader"
+# }
 
 // BRONZE-to-SILVER: SQL loader for orders and items
 data "azurerm_key_vault_secret" "sql_password" { 
@@ -105,64 +75,64 @@ data "azurerm_key_vault_secret" "sql_password" {
   key_vault_id = var.keyvault_id
 }
 
-locals {
-  sql_loader = <<CONTENT
--- Databricks notebook source
+# locals {
+#   sql_loader = <<CONTENT
+# -- Databricks notebook source
 
--- MAGIC %python
--- MAGIC azuresql_password = dbutils.secrets.get(scope="jdbc", key="azuresql")
--- MAGIC 
--- MAGIC command = '''
--- MAGIC CREATE TABLE IF NOT EXISTS jdbc_orders
--- MAGIC USING org.apache.spark.sql.jdbc
--- MAGIC OPTIONS (
--- MAGIC   url "jdbc:sqlserver://${var.sql_server_name}.database.windows.net:1433;database=orders",
--- MAGIC   database "orders",
--- MAGIC   dbtable "orders",
--- MAGIC   user "tomas",
--- MAGIC   password "{0}"
--- MAGIC )'''.format(azuresql_password)
--- MAGIC 
--- MAGIC spark.sql(command)
+# -- MAGIC %python
+# -- MAGIC azuresql_password = dbutils.secrets.get(scope="jdbc", key="azuresql")
+# -- MAGIC 
+# -- MAGIC command = '''
+# -- MAGIC CREATE TABLE IF NOT EXISTS jdbc_orders
+# -- MAGIC USING org.apache.spark.sql.jdbc
+# -- MAGIC OPTIONS (
+# -- MAGIC   url "jdbc:sqlserver://${var.sql_server_name}.database.windows.net:1433;database=orders",
+# -- MAGIC   database "orders",
+# -- MAGIC   dbtable "orders",
+# -- MAGIC   user "tomas",
+# -- MAGIC   password "{0}"
+# -- MAGIC )'''.format(azuresql_password)
+# -- MAGIC 
+# -- MAGIC spark.sql(command)
 
--- COMMAND ----------
+# -- COMMAND ----------
 
-CREATE OR REPLACE TABLE mycatalog.mydb.orders
-AS SELECT * FROM jdbc_orders
+# CREATE OR REPLACE TABLE mycatalog.mydb.orders
+# AS SELECT * FROM jdbc_orders
 
--- COMMAND ----------
+# -- COMMAND ----------
 
--- MAGIC %python
--- MAGIC azuresql_password = dbutils.secrets.get(scope="jdbc", key="azuresql")
--- MAGIC 
--- MAGIC command = '''
--- MAGIC CREATE TABLE IF NOT EXISTS jdbc_items
--- MAGIC USING org.apache.spark.sql.jdbc
--- MAGIC OPTIONS (
--- MAGIC   url "jdbc:sqlserver://${var.sql_server_name}.database.windows.net:1433;database=orders",
--- MAGIC   database "orders",
--- MAGIC   dbtable "items",
--- MAGIC   user "tomas",
--- MAGIC   password "{0}"
--- MAGIC )'''.format(azuresql_password)
--- MAGIC 
--- MAGIC spark.sql(command)
+# -- MAGIC %python
+# -- MAGIC azuresql_password = dbutils.secrets.get(scope="jdbc", key="azuresql")
+# -- MAGIC 
+# -- MAGIC command = '''
+# -- MAGIC CREATE TABLE IF NOT EXISTS jdbc_items
+# -- MAGIC USING org.apache.spark.sql.jdbc
+# -- MAGIC OPTIONS (
+# -- MAGIC   url "jdbc:sqlserver://${var.sql_server_name}.database.windows.net:1433;database=orders",
+# -- MAGIC   database "orders",
+# -- MAGIC   dbtable "items",
+# -- MAGIC   user "tomas",
+# -- MAGIC   password "{0}"
+# -- MAGIC )'''.format(azuresql_password)
+# -- MAGIC 
+# -- MAGIC spark.sql(command)
 
--- COMMAND ----------
+# -- COMMAND ----------
 
-CREATE OR REPLACE TABLE mycatalog.mydb.items
-AS SELECT * FROM jdbc_items
+# CREATE OR REPLACE TABLE mycatalog.mydb.items
+# AS SELECT * FROM jdbc_items
 
--- COMMAND ----------
+# -- COMMAND ----------
 
-CONTENT
-}
+# CONTENT
+# }
 
-resource "databricks_notebook" "sql_loader" {
-  content_base64 = base64encode(local.sql_loader)
-  language       = "SQL"
-  path           = "/Shared/sql_loader"
-}
+# resource "databricks_notebook" "sql_loader" {
+#   content_base64 = base64encode(local.sql_loader)
+#   language       = "SQL"
+#   path           = "/Shared/sql_loader"
+# }
 
 
 // ETL pipeline - for future redesign to DLT

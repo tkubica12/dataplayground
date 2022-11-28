@@ -1,5 +1,9 @@
 -- Databricks notebook source
--- MAGIC %run /Shared/demo_include
+
+-- COMMAND ----------
+
+-- MAGIC %python
+-- MAGIC spark.conf.set('demo.storage_account_name', dbutils.secrets.get(scope="azure", key="storage_account_name")
 
 -- COMMAND ----------
 
