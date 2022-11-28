@@ -1,4 +1,4 @@
-# My study notes for Databricks engineer associate exam
+# Notes for Databricks Data Engineer Associate certification
 
 ## Data ingestion from file
 

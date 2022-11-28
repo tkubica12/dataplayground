@@ -72,3 +72,7 @@ TBD:
 Inputs - there are few input variables you can pass (see inputs.tf):
 - location (westeurope if not changed)
 - existing_metastore_id (if you want to use existing metastore as currently Databricks supports only one per region, otherwise new one will be created)
+
+## My notes for certifications
+- [Databricks ML Associate](notes/Databricks%20ML%20associate/README.md)
+- [Databricks Data Engineer Associate](notes/Databricks%20Data%20Engineer%20Associate/README.md)
