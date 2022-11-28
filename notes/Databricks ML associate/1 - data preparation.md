@@ -1,5 +1,11 @@
 - [Delta in Python](#delta-in-python)
 - [Data preparation with DataFrame API](#data-preparation-with-dataframe-api)
+  - [Basic operations](#basic-operations)
+  - [Date time functions](#date-time-functions)
+  - [String functions](#string-functions)
+  - [Collection functions](#collection-functions)
+  - [Handling missing values](#handling-missing-values)
+  - [Advanced manipulation with UDFs](#advanced-manipulation-with-udfs)
 - [Using Pandas in Spark](#using-pandas-in-spark)
 - [Data split](#data-split)
   - [Random split 80/20](#random-split-8020)
@@ -57,6 +63,8 @@ delta_table.vacuum(0)
 
 # Data preparation with DataFrame API
 
+## Basic operations
+
 ```python
 # Select just certain columns
 my_df = raw_df.select(["beds","bed_type"])
@@ -65,8 +73,18 @@ my_df = raw_df.select(["beds","bed_type"])
 my_df.schema
 my_df.printSchema()
 
-# SELECT .. WHERE
-my_df.select("col1", "col2").where("col2 < 200").orderBy("col2")
+# SELECT .. WHERE (note DataFrame where is alias for filter)
+my_df.select("col1", "col2", col("col3.subitem".alias("col3s")).where("col2 < 200").orderBy("col2")
+
+# SELECT ... WHERE by creating temp and using regular SQL
+my_df.createOrReplaceTempView("my")
+spark.sql("SELECT col1, col2, col3.subitem AS col3d FROM my WHERE col2 < 200 ORDER BY col2")
+
+# selectExpr() can use expressions on column, such as get true if device in macOS, iOS
+events_df.selectExpr("user_id", "device in ('macOS', 'iOS') as apple_user")
+
+# The same result using withColumn()
+events_df.withColumn("apple_user", col("device").isin('macOS', 'iOS')).select("user_id", "apple_user")
 
 # Collect values from DataFrame
 for row in budget_df.select("price").collect():
@@ -79,6 +97,16 @@ fixed_price_df = base_df.withColumn("price", translate(col("price"), "$,", "").c
 log_train_df = train_df.withColumn("logPrice", log("price"))
 exp_df = pred_df.withColumn("label", exp(col("label"))).withColumn("prediction", exp(col("prediction")))
 
+# Add column with literal value (eg. good for reference model that always answers 0)
+from pyspark.sql.functions import lit
+events_df.withColumn("prediction", lit(0))
+
+# Drop column
+events_df.drop("items")
+
+# Deduplicate (note distinct is alias for dropDuplicates)
+events_df.distinct()
+
 # Feature stats
 display(fixed_price_df.describe())      # count, mean, min, max, std dev
 display(fixed_price_df.summary())       # count, mean, min, max, std dev, 25%, 50%, 75%
@@ -88,26 +116,64 @@ dbutils.data.summarize(fixed_price_df)  # more stats about features including ch
 pos_prices_df = fixed_price_df.filter(col("price") > 0)
 
 # Aggregate count based on categorical feature
-display(pos_prices_df
-        .groupBy("minimum_nights")
-        .count()
-        .orderBy(col("count").desc(), col("minimum_nights"))
-       )
+pos_prices_df.groupBy("minimum_nights").count().orderBy(col("count").desc(), col("minimum_nights"))
+
+# Aggregate average revenue by state
+df.groupBy("geo.state").avg("ecommerce.purchase_revenue_in_usd")
+
+# Multiple different aggregations with agg()
+df.groupBy("geo.state").agg(avg("revenue").alias("avg_revenue"),approx_count_distinct("user_id").alias("distinct_users"))
 
 # WHERE
 display(imputed_df.where((imputed_df["beds_na"] == 0) & (imputed_df["beds"] == 1))[["beds", "beds_na"]])
 ```
 
-Handling nulls
-- Drop any records that contain nulls
-- Numeric:
-    - Replace them with mean/median/zero/etc.
-- Categorical:
-    - Replace them with the mode
-    - Create a special category for null
-- Use techniques like ALS (Alternating Least Squares) wh_ich are designed to impute missing values
+## Date time functions
+| Method | Description |
+| --- | --- |
+| **`add_months`** | Returns the date that is numMonths after startDate |
+| **`current_timestamp`** | Returns the current timestamp at the start of query evaluation as a timestamp column |
+| **`date_format`** | Converts a date/timestamp/string to a value of string in the format specified by the date format given by the second argument. |
+| **`dayofweek`** | Extracts the day of the month as an integer from a given date/timestamp/string |
+| **`from_unixtime`** | Converts the number of seconds from unix epoch (1970-01-01 00:00:00 UTC) to a string representing the timestamp of that moment in the current system time zone in the yyyy-MM-dd HH:mm:ss format |
+| **`minute`** or second, dayofweek, month, year, ... | Extracts the minutes as an integer from a given date/timestamp/string. |
+| **`unix_timestamp`** | Converts time string with given pattern to Unix timestamp (in seconds) |
 
-If you do ANY imputation techniques for categorical/numerical features, you MUST include an additional field specifying that field was imputed.
+## String functions
+| Method | Description |
+| --- | --- |
+| translate | Translate any character in the src by a character in replaceString |
+| regexp_replace | Replace all substrings of the specified string value that match regexp with rep |
+| regexp_extract | Extract a specific group matched by a Java regex, from the specified string column |
+| ltrim | Removes the leading space characters from the specified string column |
+| lower | Converts a string column to lowercase |
+| split | Splits str around matches of the given pattern |
+
+## Collection functions
+| Method | Description |
+| --- | --- |
+| array_contains | Returns null if the array is null, true if the array contains value, and false otherwise. |
+| element_at | Returns element of array at given index. Array elements are numbered starting with **1**. |
+| explode | Creates a new row for each element in the given array or map column. |
+| collect_set | Returns a set of objects with duplicate elements eliminated. |
+
+## Handling missing values
+- Always drop raws missing label (y ... the thing you are going to predict)
+- Features with a lot of nulls might not add value, drop column
+- Features with few nulls
+  - If row is missing multiple features it might be better to drop the row
+  - Complete Case Analysis is strategy to drop all rows containing any nulls -> important to note is that missing values are due to randomness - Missing At Random (there is no hidden information in missing values such as "did not want to respond") and we still have enough data after this operation (eg. drop less than 5%)
+  - If row is missing just one feature it might be better to impute value as dropping row is information loss
+    - Numeric:
+        - Mean
+        - Median
+        - Zero or some other arbitrary value (eg. 37 degrees Celsius for human body measurement)
+    - Categorical:
+        - Most frequent (mode)
+        - Special category for null (can be useful when it actually represents some decision rather than quality issue, eg. sex being male, female and "did not answer" or "not applicable"). If null actually holds information value than dropping such rows might introduce bias.
+    - There are advanced methods such as ALS (Alternating Least Squares), KNN, MICE or even using Deep Learning to impute (calculate missing values based on other features in dataset)
+
+If you do any imputation techniques for categorical/numerical features, you should include an additional field specifying that field was imputed.
 
 ```python
 from pyspark.ml.feature import Imputer
@@ -118,7 +184,8 @@ imputer_model = imputer.fit(doubles_df)
 imputed_df = imputer_model.transform(doubles_df)
 ```
 
-For **advanced manipulation** on data in column we can use lambda. In this example we have values "t" and "f" in column and we want to convert this to 0 and 1.
+## Advanced manipulation with UDFs
+For advanced manipulation on data in column we can use lambda. In this example we have values "t" and "f" in column and we want to convert this to 0 and 1. Note Python UDFs are **slow** - prefer using standard Spark functions or use Pandas UDFs which are better performing (via using Arrow).
 
 ```python
 # Define regular function
@@ -128,11 +195,39 @@ def boolstring_to_number(x):
     else:
         return 0
 
-# Use it in UDF with lambda
-boolstring_to_number_udf = udf(lambda x : bool_to_number(x))
+# Make it UDF
+boolstring_to_number_udf = udf(boolstring_to_number)
 
 # Then use this logic on values in column
 label_df = airbnb_df.withColumn("label", boolstring_to_number_udf(col("host_is_superhost")).cast('float'))
+```
+
+We can also use decorator to define function as UDF. Advantage is we can give typehint so UDF returns float (no need to cast as in previous example)
+
+```python
+@udf("float")
+def boolstring_to_number_udf(x) -> float:
+    if x == "t":
+        return 1
+    else:
+        return 0
+```
+
+This task can be achieved much more efficiently using pyspark functions so make sure you use UDFs only when neccessary.
+
+```python
+from pyspark.sql.functions import when
+label_df = airbnb_df.withColumn("label", when(col("host_is_superhost") == "t", 1).otherwise(0).cast("float"))
+```
+
+UDFs can also be registered for use in SQL.
+
+```python
+boolstring_to_number_udf = spark.udf.register("sql_udf", bool_to_number)
+```
+
+```sql
+select id, boolstring_to_number_udf(host_is_superhost) as label from table
 ```
 
 # Using Pandas in Spark
@@ -192,7 +287,7 @@ with mlflow.start_run(run_name="sklearn-random-forest") as run:
     rf = RandomForestRegressor(n_estimators=100, max_depth=10, random_state=42)
     rf.fit(X_train, y_train)
 
-# LInferencing
+# Inferencing
 spark_df = spark.createDataFrame(X_test)
 from typing import Iterator, Tuple
 

@@ -1,3 +1,6 @@
+- [Serving models](#serving-models)
+  - [Streaming example](#streaming-example)
+
 # Serving models
 MLFlow provides easy way to server models as REST API. It will create single-node cluster dedicated to this model.
 

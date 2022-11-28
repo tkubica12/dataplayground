@@ -37,7 +37,7 @@ display(dt_model)
 # Display feature importance (by index)
 dt_model.featureImportances 
 
-# Display feature importance more radable (by name)
+# Display feature importance more readable (by name)
 import pandas as pd
 
 features_df = pd.DataFrame(list(zip(vec_assembler.getInputCols(), dt_model.featureImportances)), columns=["feature", "importance"])
