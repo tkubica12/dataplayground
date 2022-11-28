@@ -10,7 +10,7 @@ terraform {
     }
     azapi = {
       source  = "azure/azapi"
-      version = "~>0"
+      version = "~>1"
     }
     databricks = {
       source  = "databricks/databricks"
