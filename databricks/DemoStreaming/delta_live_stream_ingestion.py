@@ -13,7 +13,7 @@ def stream_pageviews():
     connection = f'kafkashaded.org.apache.kafka.common.security.plain.PlainLoginModule required username="$ConnectionString" password="Endpoint=sb://{eventhub_namespace_name}.servicebus.windows.net/;SharedAccessKeyName=pageviewsReceiver;SharedAccessKey={eventhub_pages_key}";'
 
     kafka_options = {
-     f"kafka.bootstrap.servers": "{eventhub_namespace_name}.servicebus.windows.net:9093",
+     "kafka.bootstrap.servers": f"{eventhub_namespace_name}.servicebus.windows.net:9093",
      "kafka.sasl.mechanism": "PLAIN",
      "kafka.security.protocol": "SASL_SSL",
      "kafka.request.timeout.ms": "60000",
@@ -29,7 +29,7 @@ def stream_stars():
     connection = f'kafkashaded.org.apache.kafka.common.security.plain.PlainLoginModule required username="$ConnectionString" password="Endpoint=sb://{eventhub_namespace_name}.servicebus.windows.net/;SharedAccessKeyName=starsReceiver;SharedAccessKey={eventhub_stars_key}";'
 
     kafka_options = {
-     f"kafka.bootstrap.servers": "{eventhub_namespace_name}.servicebus.windows.net:9093",
+     "kafka.bootstrap.servers": f"{eventhub_namespace_name}.servicebus.windows.net:9093",
      "kafka.sasl.mechanism": "PLAIN",
      "kafka.security.protocol": "SASL_SSL",
      "kafka.request.timeout.ms": "60000",

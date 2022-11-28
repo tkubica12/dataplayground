@@ -3,7 +3,7 @@
 -- COMMAND ----------
 
 -- MAGIC %python
--- MAGIC spark.conf.set('demo.storage_account_name', dbutils.secrets.get(scope="azure", key="storage_account_name")
+-- MAGIC spark.conf.set('demo.storage_account_name', dbutils.secrets.get(scope="azure", key="storage_account_name"))
 
 -- COMMAND ----------
 
