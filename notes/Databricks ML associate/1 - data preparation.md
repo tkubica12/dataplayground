@@ -256,6 +256,10 @@ df = spark_df.to_pandas_on_spark()
 # Convert Spark Pandas API to Spark DataFrame
 df.to_spark()
 
+# Example - use Pandas API get_dummies function
+df_ps = ps.DataFrame(df)
+df = ps.get_dummies(data=df_ps, columns=["administrative_unit"], drop_first=True).to_spark()
+
 # Example - count by group Spark vs. Pandas API on Spark
 spark_df.groupby("property_type").count().orderBy("count", ascending=False)
 df["property_type"].value_counts()
