@@ -6,7 +6,10 @@ resource "databricks_pipeline" "streaming" {
 
   cluster {
     label       = "default"
-    num_workers = 1
+    num_workers = 0
+    spark_conf = {
+      "spark.master" = "local[*]"
+    }
   }
 
   library {
