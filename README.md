@@ -46,9 +46,7 @@ See [datageneration](datageneration/datageneration.md) for more details.
   - Alerting on VIP users access (by looking up vip.json)
   - Correlating two streams (pageviews of users who also gave star over last 15 minutes)
 
-TBD:
-- Automate silver-to-gold with increments
-- Incorporate AzureML
+For TBD see [Issues](https://github.com/tkubica12/dataplayground/issues)
 
 ## Databricks solution
 - Workspace deployed with cluster definitions
@@ -62,12 +60,7 @@ TBD:
   - Correlate two streams
   - Identiy high latency pageviews
 
-TBD:
-- Implement other streaming scenarios (waiting for DLT support for Unity Catalog)
-- Redisign bronze-to-silver to use DLT (waiting for DLT support for Unity Catalog)
-- Visualizations with Dashboard (waiting for better API documentation)
-- Incorporate SQL persona, investigate serverless SQL warehouse
-- Leverage AutoML in Databricks
+For TBD see [Issues](https://github.com/tkubica12/dataplayground/issues)
 
 Inputs - there are few input variables you can pass (see inputs.tf):
 - location (westeurope if not changed)
