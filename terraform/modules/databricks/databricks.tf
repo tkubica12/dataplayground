@@ -17,11 +17,6 @@ data "databricks_current_user" "me" {
     azurerm_databricks_workspace.main
   ]
 }
-data "databricks_spark_version" "latest" {
-  depends_on = [
-    azurerm_databricks_workspace.main
-  ]
-}
 
 data "azurerm_storage_account" "data_lake" {
   name                = var.storage_account_name
@@ -31,7 +26,7 @@ data "azurerm_storage_account" "data_lake" {
 // Cluster
 resource "databricks_cluster" "shared_cluster" {
   cluster_name            = "Shared cluster"
-  spark_version           = data.databricks_spark_version.latest.id
+  spark_version           = var.cluster_version_shared
   node_type_id            = var.node_sku
   autotermination_minutes = 10
   data_security_mode      = "USER_ISOLATION"
@@ -47,8 +42,8 @@ resource "databricks_cluster" "shared_cluster" {
 }
 
 resource "databricks_cluster" "single_user_cluster" {
-  cluster_name            = "Singe user cluster"
-  spark_version           = data.databricks_spark_version.latest.id
+  cluster_name            = "Single user cluster"
+  spark_version           = var.cluster_version_single
   node_type_id            = var.node_sku
   autotermination_minutes = 10
   data_security_mode      = "SINGLE_USER"

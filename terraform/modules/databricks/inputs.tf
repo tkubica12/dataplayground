@@ -23,7 +23,7 @@ variable "storage_resource_group_name" {
 }
 
 variable "node_sku" {
-  type = string
+  type    = string
   default = "Standard_D4s_v5"
 }
 
@@ -52,6 +52,16 @@ variable "keyvault_id" {
 }
 
 variable "existing_metastore_id" {
-  type = string
+  type    = string
   default = ""
+}
+
+variable "cluster_version_single" {
+  type    = string
+  default = "11.3.x-cpu-ml-scala2.12"
+}
+
+variable "cluster_version_shared" {
+  type    = string
+  default = "11.3.x-scala2.12"
 }
