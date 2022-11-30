@@ -32,7 +32,7 @@ display(df)
 
 # COMMAND ----------
 
-from pyspark.sql.functions import substring, col, when
+from pyspark.sql.functions import substring, col, when, translate, regexp_replace
 
 # COMMAND ----------
 
@@ -92,13 +92,26 @@ display(df)
 # COMMAND ----------
 
 # MAGIC %md
+# MAGIC Remove special characters from administrative_unit
+
+# COMMAND ----------
+
+df = df.withColumn("administrative_unit", translate(col("administrative_unit"), "áéěůúóíýžščřďťňÁÉĚŮÚÓÍÝŽŠČŘĎŤŇ", "aeeuuoiyzscrdtnAEEUUOIYZSCRDTN")) \
+       .withColumn("administrative_unit", regexp_replace(col("administrative_unit"), " kraj", "")) \
+       .withColumn("administrative_unit", regexp_replace(col("administrative_unit"), "Kraj ", ""))
+
+display(df)
+
+# COMMAND ----------
+
+# MAGIC %md
 # MAGIC Create dummy vars for administrative units
 
 # COMMAND ----------
 
 import pyspark.pandas as ps
 df_ps = ps.DataFrame(df)
-df = ps.get_dummies(data=df_ps, columns=["administrative_unit"], drop_first=True).to_spark()
+df = ps.get_dummies(data=df_ps, columns=["administrative_unit"], drop_first=True, dtype="int").to_spark()
 
 display(df)
 
@@ -115,9 +128,24 @@ display(df)
 
 # COMMAND ----------
 
-# MAGIC %md
-# MAGIC # Storage data in Feature Store
+display(df.printSchema)
 
 # COMMAND ----------
 
-# TBD
+# MAGIC %md
+# MAGIC # Store data in Feature Store
+
+# COMMAND ----------
+
+from databricks import feature_store
+
+fs = feature_store.FeatureStoreClient()
+
+spark.sql("CREATE DATABASE IF NOT EXISTS hive_metastore.features")
+
+fs.create_table(name="hive_metastore.features.users", primary_keys="user_id", schema=df.schema, description="Features for users based on user_id")
+fs.write_table(name="hive_metastore.features.users", df=df, mode="overwrite")
+
+# COMMAND ----------
+
+
