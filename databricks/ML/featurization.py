@@ -128,10 +128,6 @@ display(df)
 
 # COMMAND ----------
 
-display(df.printSchema)
-
-# COMMAND ----------
-
 # MAGIC %md
 # MAGIC # Store data in Feature Store
 
