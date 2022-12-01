@@ -43,8 +43,8 @@ resource "databricks_job" "engagement_table" {
   }
 }
 
-resource "databricks_job" "featurizations_users" {
-  name = "featurizations_users"
+resource "databricks_job" "featurize_users" {
+  name = "featurize_users"
 
   existing_cluster_id = databricks_cluster.single_user_cluster.id
 
@@ -54,6 +54,36 @@ resource "databricks_job" "featurizations_users" {
   }
 
   notebook_task {
-    notebook_path = "${databricks_repo.main.path}/databricks/ML/featurization"
+    notebook_path = "${databricks_repo.main.path}/databricks/ML/featurize_users"
+  }
+}
+
+resource "databricks_job" "featurize_orders" {
+  name = "featurize_orders"
+
+  existing_cluster_id = databricks_cluster.single_user_cluster.id
+
+  schedule {
+    quartz_cron_expression = "0 */50 * ? * *"
+    timezone_id            = "UTC"
+  }
+
+  notebook_task {
+    notebook_path = "${databricks_repo.main.path}/databricks/ML/featurize_orders"
+  }
+}
+
+resource "databricks_job" "train_LR" {
+  name = "train_LR"
+
+  existing_cluster_id = databricks_cluster.single_user_cluster.id
+
+  schedule {
+    quartz_cron_expression = "0 */59 * ? * *"
+    timezone_id            = "UTC"
+  }
+
+  notebook_task {
+    notebook_path = "${databricks_repo.main.path}/databricks/ML/train_LR"
   }
 }
