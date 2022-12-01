@@ -65,6 +65,17 @@ display(df)
 # COMMAND ----------
 
 # MAGIC %md
+# MAGIC Rename columns
+
+# COMMAND ----------
+
+df = df.withColumnRenamed("orderId", "order_id").withColumnRenamed("userId", "user_id").withColumnRenamed("orderValue", "order_value")
+
+display(df)
+
+# COMMAND ----------
+
+# MAGIC %md
 # MAGIC ## Store data in Feature Store
 
 # COMMAND ----------
@@ -75,5 +86,5 @@ fs = feature_store.FeatureStoreClient()
 
 spark.sql("CREATE DATABASE IF NOT EXISTS hive_metastore.features")
 
-fs.create_table(name="hive_metastore.features.orders", primary_keys="orderId", schema=df.schema, description="Features for orders")
+fs.create_table(name="hive_metastore.features.orders", primary_keys="order_id", schema=df.schema, description="Features for orders")
 fs.write_table(name="hive_metastore.features.orders", df=df, mode="overwrite")

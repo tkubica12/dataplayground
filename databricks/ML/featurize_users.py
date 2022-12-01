@@ -23,7 +23,7 @@
 # MAGIC CREATE OR REPLACE TEMP VIEW mydata AS
 # MAGIC SELECT administrative_unit, 
 # MAGIC       birth_number,
-# MAGIC       users.id as user_id, 
+# MAGIC       CAST(users.id AS integer) as user_id, 
 # MAGIC       sum(orderValue) as total_orders_value, 
 # MAGIC       iff(isnull(vipusers.id), false, true) AS is_vip
 # MAGIC FROM users
@@ -138,6 +138,10 @@ display(df)
 df = df.drop("birth_number", "birth_year")
 
 display(df)
+
+# COMMAND ----------
+
+df.columns
 
 # COMMAND ----------
 
