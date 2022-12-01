@@ -1,6 +1,19 @@
 # Databricks notebook source
 # MAGIC %md
-# MAGIC # Get aggregates from Delta tables
+# MAGIC # Featurize user information
+# MAGIC 
+# MAGIC - age category as OHE
+# MAGIC - sex as OHE
+# MAGIC - total orders value
+# MAGIC - vip status
+# MAGIC - administrative unit as OHE
+# MAGIC 
+# MAGIC user_id as lookup key
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Get aggregates from Delta tables
 
 # COMMAND ----------
 
@@ -28,7 +41,7 @@ display(df)
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC # Featurization
+# MAGIC ## Featurization
 
 # COMMAND ----------
 
@@ -129,7 +142,7 @@ display(df)
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC # Store data in Feature Store
+# MAGIC ## Store data in Feature Store
 
 # COMMAND ----------
 
