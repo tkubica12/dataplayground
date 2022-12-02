@@ -8,7 +8,6 @@
   - [Advanced manipulation with UDFs](#advanced-manipulation-with-udfs)
 - [Using Pandas in Spark](#using-pandas-in-spark)
 - [Data split](#data-split)
-  - [Random split 80/20](#random-split-8020)
 
 # Delta in Python
 
@@ -323,9 +322,28 @@ display(spark_df.mapInPandas(predict, """`host_total_listings_count` DOUBLE,`nei
 
 
 # Data split
-
-## Random split 80/20
+This how to split data in Spark. Note seed is used to get the same results everz time, but since Spark is distributed this is not enough. Actual result also depends on number of partitions which are by default based on size of cluster.
 
 ```python
+# Repartition DataFrame if you need repeatability across different cluster configurations
+airbnb_df.repartition(24)
+
+# Split data
 train_df, test_df = airbnb_df.randomSplit([.8, .2], seed=42)
 ```
+
+Note this is different with sklearn that is often used for dev and single-node scenarios (eg. multi-node deep learning is difficult and very often people use just single GPU-enabled node).
+
+```python
+# Split with sklearn
+from sklearn.model_selection import train_test_split
+train, test = train_test_split(df, test_size=0.2, random_state=0)
+
+# In spark features are vectorized a part of the same DataFrame
+# In other frameworks such as Tensorflow you typicaly have separatae DataFrame for features and labels
+X_train, X_test, y_train, y_test = train_test_split(df_X, df_y, test_size=0.33)
+
+# Note convention that uppercase X means multiple features and lowercase y means single label
+```
+
+Note with hyperparameter tuning using test data to tune hyperparameters is not recommended because test information "leaks" to training making it overfit. Therefore you typically split data into train, validation and test. Validation is used to tune hyperparameters and test is used to evaluate final model. But this would mean that pretty big portion of your data is not used for training (eg. 20% as test and 20% as validation) so often validation data is based on rolling (K-folding) with cross-valadation (see more in section on training).

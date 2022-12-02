@@ -7,6 +7,7 @@
   - [Logistic regression (not in scope)](#logistic-regression-not-in-scope)
   - [Time Series Forecasting (not in scope)](#time-series-forecasting-not-in-scope)
   - [Deep Learning (not in scope)](#deep-learning-not-in-scope)
+- [Single-node vs. distributed solutions](#single-node-vs-distributed-solutions)
 - [Training](#training)
 - [Save model](#save-model)
 - [Hyperparameter tuning](#hyperparameter-tuning)
@@ -50,11 +51,16 @@ lr = LogisticRegression(regParam=0.1, elasticNetParam=1.0, family="multinomial")
 - We need to stop splitting at some point to avoid overfitting
 - Easy to interpret
 - Can capture non-linear problems
-- Few hyperparameters to tune
-- In MLLib we still need to convert all features to vector, but we will not use OHE (just indexer)
+- Just a few hyperparameters to tune (easier)
+  - maxDepth - how deep the tree can be
+  - maxBins - how many bins to use for continuous features, this is typically has to be at least the size of highest cardinality categorical feature
+- In MLLib we still need to convert all features to vector, but we will not use OHE (just indexer) -> OHE would lead to worse results as algorithm would give more importance to continuous features
 
 ```python
 dt = DecisionTreeRegressor(labelCol="price")
+
+# Get feature importance
+list(zip(vec_assembler.getInputCols(), dt_model.featureImportances))
 ```
 
 ## Random forest
@@ -65,7 +71,7 @@ dt = DecisionTreeRegressor(labelCol="price")
 - Hyperparameters to tune:
   - Number of trees (numTrees in MLLib, n_estimators in sklearn)
   - Max depth (maxDepth in MLLib, max_depth in sklearn)
-  - Max bins (maxBins in MLLib, not in sklearn and it is not distributed)
+  - Max bins (maxBins in MLLib,  Max number of bins for discretizing continuous features)
   - Max features (featureSubsetStrategy in MLLib, max_features in sklearn)
 
 ```python
@@ -174,6 +180,18 @@ Using different courses to learn this, so just few notes for reference.
   - Model improves during training on train data, but more and more overfits so will perform poorly on new data. We can split data to train, validate and test. Early stopping is looking at validation results and stops training when it is no longer improving or even gets worse (even training results are still improving) - basically stops before overfits.
   - Even we use validation set model can still overfit to validation (not just training). To prevent that K-fold Cross Validation is often used to improve on that (eg. split training set to fifths and round robin rotate to use one for validation and four for training)
 
+# Single-node vs. distributed solutions
+ML can be computationally intensive, so it would make sense to use distributed solution. There are two types of parallelism from multi-node perspective:
+- Embarassingly parallel - tasks do not neet to communicate during processing so job is divided and each task can be run on different node. Good example is movie rendering where you can go frame by frame or with hyperparameter tuning in ML.
+- Fine-grained paralellism - tasks need to communicate often. If very often this leads to creating solutions with ultra-low-speed networking (Infiniband to build HPC cluster). ML training might have some parts considered coarse-grained (eg. decision trees are calculated in parallel and then combined together), but especialy in Deep Learning they are fine-grained.
+
+- Sklearn, XGBoost, LightGBM, CatBoost are single-node solutions
+- MLLib (Spark ML) is distributed solution
+- Tensorflow, PyTorch, Keras are single-node solutions, but solutions to make them distributed are available (yet complex).
+
+**Horovod** is Databricks tool to provide parallelism to deep learning on Spark = can accelerate DL.
+
+**Hyperopt** is Databricks toold to provide hyperparameter tuning on Spark by running multiple single-node jobs across cluster = can accelerate hyperparameter tuning of single-node implementations, but is **not** making single DL job run in parallel manner.
 
 # Training
 First we need to declare model, in this example LiearRegression, where we need to specify features and label.
@@ -305,14 +323,14 @@ from pyspark.ml.tuning import CrossValidator
 
 evaluator = MulticlassClassificationEvaluator(metricName="accuracy")
 
-# Option 1 - make cv part of pipeline
+# Option 1 - make cv part of pipeline - might be easier, but risks data leakage to training
 cv = CrossValidator(estimator=rf, evaluator=evaluator, estimatorParamMaps=param_grid, numFolds=3, seed=42)
 
 pipeline = Pipeline(stages=[r_formula, cv])
 pipeline_model = pipeline.fit(train_df)
 pred_df = pipeline_model.transform(test_df)
 
-# Option 2 - use pipeline as part of cv
+# Option 2 - use pipeline as part of cv - safer
 pipeline = Pipeline(stages=[r_formula, lr])
 
 cv = CrossValidator(estimator=pipeline, evaluator=evaluator, estimatorParamMaps=param_grid, numFolds=3, seed=42)
@@ -323,7 +341,14 @@ list(zip(model.getEstimatorParamMaps(), model.avgMetrics))
 ```
 
 ## HyperOpt
-Framework for advanced hyperparameter tuning. Instead of discrete values (like in ParamGrid) we can specify ranges and algorithm is using various techniques to find best values. Also HyperOpt is trying to parallelize the process using SparkTrials - eg. it can run multiple models in parallel on different machines.
+Framework for advanced hyperparameter tuning. Instead of discrete values (like in ParamGrid) we can specify ranges and algorithm is using various techniques to find best values. Also HyperOpt is trying to parallelize the process using SparkTrials class - eg. it can run multiple single-node model training jobs (eg. sklearn) in parallel on different machines. Note SparkTrials are not supported for distributed learning algorithms such as MLLib or Horovod, so use Trials class instead.
+
+Example options for search space:
+- quniform - uniform distribution between low and high, rounded to q (eg. whole numbers only)
+- uniform - value uniformly distributed between low and high
+- choice - list of values, good for categorical parameters such as activation function in DL
+- randint - random integer in a range 0 - upper
+- normal - normal distribution with mean and standard deviation
 
 ```python
 def objective_function(params):    
