@@ -17,7 +17,7 @@ data = [(101,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1),
     (220,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1),
     (333,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1),
     (412,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1),
-    (555,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1)
+    (6899,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1)
   ]
 
 schema = StructType([ \
@@ -60,10 +60,8 @@ from pyspark.sql.functions import lit
 
 fs = feature_store.FeatureStoreClient()
 
-df = df.withColumn("order_id", lit(0))
-
 predictions = fs.score_batch(
-    'models:/order_value/10',
+    'models:/order_value/1',
     df
 )
 

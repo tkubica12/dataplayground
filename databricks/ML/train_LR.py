@@ -18,6 +18,8 @@ df = fs.read_table(
   name='hive_metastore.features.orders',
 )
 
+df = df.drop("order_id")
+
 display(df)
 
 # COMMAND ----------
@@ -62,7 +64,7 @@ training_set = fs.create_training_set(
   df=df,
   feature_lookups = feature_lookups,
   label = 'order_value',
- exclude_columns = ['customer_id', 'product_id']
+  exclude_columns = ['customer_id', 'product_id']
 )
 
 df = training_set.load_df()
@@ -109,7 +111,7 @@ with mlflow.start_run(run_name="LR-Single-Feature") as run:
     # Log in Feature Store
     fs.log_model(
         pipeline_model,
-        "model",
+        artifact_path="model",
         flavor=mlflow.spark,
         training_set=training_set,
         registered_model_name="order_value"
@@ -125,8 +127,8 @@ with mlflow.start_run(run_name="LR-Single-Feature") as run:
 
 # COMMAND ----------
 
-model_uri = f"runs:/{run_id}/model"
-mlflow.register_model(model_uri=model_uri, name="order_value")
+#model_uri = f"runs:/{run_id}/model"
+#mlflow.register_model(model_uri=model_uri, name="order_value")
 
 # COMMAND ----------
 
