@@ -46,7 +46,7 @@ See [datageneration](datageneration/datageneration.md) for more details.
   - Alerting on VIP users access (by looking up vip.json)
   - Correlating two streams (pageviews of users who also gave star over last 15 minutes)
 
-For TBD see [Issues](https://github.com/tkubica12/dataplayground/issues)
+For TBD see [GitHub Issues](https://github.com/tkubica12/dataplayground/issues?q=is%3Aissue+is%3Aopen+label%3AMicrosoft)
 
 ## Databricks solution
 - Workspace deployed with cluster definitions
@@ -60,7 +60,7 @@ For TBD see [Issues](https://github.com/tkubica12/dataplayground/issues)
   - Correlate two streams
   - Identiy high latency pageviews
 
-For TBD see [Issues](https://github.com/tkubica12/dataplayground/issues)
+For TBD see [GitHub Issues](https://github.com/tkubica12/dataplayground/issues?q=is%3Aissue+is%3Aopen+label%3ADatabricks)
 
 Inputs - there are few input variables you can pass (see inputs.tf):
 - location (westeurope if not changed)
