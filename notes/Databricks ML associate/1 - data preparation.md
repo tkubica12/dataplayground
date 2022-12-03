@@ -236,6 +236,9 @@ Pandas is ery popular Python library for data manipulation and analysis. Unfortu
 - Spark DataFrame API -> Native Spark API to do similar things (data transformation, filtering, data preparation, imputation etc.) - different from Pandas so if you have Pandas code developed on local machine you need to rewrite
 - Pandas UDF -> You can define Pandas function (some processing logic such as in previous chapter - convert "t" to 1 and "f" to 0) as UDF and use it to process data in Spark DataFrame (eg. using withColumn)
 
+Performance wise:
+Spark DataFrame > Spark Pandas API > Pandas UDF > Pandas
+
 ```python
 # Read Parquet file as Spark DataFrame
 spark_df = spark.read.parquet(f"{DA.paths.datasets}/airbnb/sf-listings/sf-listings-2019-03-06-clean.parquet/")
@@ -270,7 +273,7 @@ df.plot(kind="hist", x="bedrooms", y="price", bins=200)
 ps.sql("SELECT distinct(property_type) FROM {df}", df=df)
 ```
 
-
+Here is example of Pandas UDF used for inferencing.
 
 ```python
 # Train
@@ -305,7 +308,7 @@ def predict(iterator: Iterator[pd.DataFrame]) -> Iterator[pd.Series]:
 prediction_df = spark_df.withColumn("prediction", predict(*spark_df.columns))
 display(prediction_df)
 
-# More efficient inferencing (will reuse model model from memory rather than loading it again)
+# More efficient inferencing (will reuse model model from memory rather than loading it again for every batch)
 predict_function = mlflow.pyfunc.spark_udf(spark, model_path)
 features = X_train.columns
 display(spark_df.withColumn("prediction", predict_function(*features)))

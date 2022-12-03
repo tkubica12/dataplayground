@@ -20,7 +20,7 @@ vec_train_df = vec_assembler.transform(train_df)
 ```
 
 ## Categorical features
-For categorical feature we need to creat dummy variables (One Hot Encoding). This is two step process in Spark.
+For categorical feature we need to create dummy variables (One Hot Encoding). This is two step process in Spark.
 
 ```python
 from pyspark.ml.feature import OneHotEncoder, StringIndexer
@@ -47,7 +47,7 @@ vec_assembler = VectorAssembler(inputCols=assembler_inputs, outputCol="features"
 ```
 
 ## Automation with RFormula
-Another approach is to automate this with RFormula by providing columns and let system automatically deal with numerical and cathegorical features. Than you will just use RFormula in pipeline instead of manually created VectorAssembler.
+Another approach is to automate this with RFormula by providing columns and let system automatically deal with numerical and categorical features. Than you will just use RFormula in pipeline instead of manually created VectorAssembler.
 
 ```python
 # We need string "label_column ~ feature1 + feature2 + feature 3"
@@ -59,14 +59,14 @@ r_formula = RFormula(formula="price ~ f1 + f2")  # predict log_price based on fe
 ```
 
 # Feature Store
-Centralized reposity of features to enable sharing and discovery across organization. 
+Centralized repository of features to enable sharing and discovery across organization. 
 - For model you might do some transformation on feature (eg. logarithm, normalization, unit conversion, parsing) and you do it with Spark on top of RAW JSON files via Delta Tables in Silver tier. But then application is using this model for real-time inferencing from their application code. How to ensure both transformations are consistent? How can application team discover what data model expects?
 - As preparing features is significant portion of data science work it is import to not repeat yourself. One data source might be used for multiple teams and models and sharing already prepared features saves time.
 - Feature transformations might evolve over time and you might need to look on previous versions.
 - You will get lineage - information what notebooks, jobs, models and endpoints are using specific feature.
 - Feature Store is kind of analogy to GOLD tier in data lake architecture - data ready for consumption by "end users" (training and inferencing jobs)
 - Why feature store in real-time inferencing? Application calling model has some fresh data (features) such as page use is currently on, product he is viewing etc. But model is trained on much more than that - user data (age, sex, location), historical data (products purchased per category, usual order size, usual order day of week) etc. Model does not contain this data after it is trained, you need to supply it. App also does not have it, but can look it up based on customer_id.
-- Data to Feature Store can be streamed using Delta Live Tables eg. Kafka stream of events can regulary add records to feature store. You can than run batch inferencing every day eg. to send emails with discounts to identified customers. Weekly you can retrain the model using Feature Store and get new model version that will now better reflect changes in trends and behaviors happend over last week.
+- Data to Feature Store can be streamed using Delta Live Tables eg. Kafka stream of events can regulary add records to feature store. You can than run batch inferencing every day eg. to send emails with discounts to identified customers. Weekly you can retrain the model using Feature Store and get new model version that will now better reflect changes in trends and behaviors happened over last week.
 
 
 ```python

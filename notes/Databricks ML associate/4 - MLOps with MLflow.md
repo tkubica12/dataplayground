@@ -7,7 +7,7 @@ OSS platform to managed ML lifecycle
 
 ## Tracking
 
-This is how tracking is enabled - basicaly run traning inside mlflow.start_run
+This is how tracking is enabled - basically run training inside mlflow.start_run
 
 ```python
 import mlflow
@@ -283,4 +283,5 @@ client.transition_model_version_stage(
 ```
 
 Note you cannot remove model if there are any versions in active stages (staging and production).
+
 

@@ -84,13 +84,16 @@ rf = RandomForestRegressor(labelCol="price", maxBins=40)
  - We only add new tree to the model as long as gradient is closer to zero (slope is less steep, so we are closer to minimum)
  - Pretty similar to gradient descent used in deep learning
  - Can overfit easily
+ - Typically supports both GPU learning and distributed learning
  - Somewhat between Linear Regression and Deep Neural Networks because it:
    - Can achieve good performance in quite complex problems (closer to DNNs)
    - For complex yet structured data try GBT first, for unstructured problems like vision/pixels, try DNNs first
    - It is still easier to compute than DNNs (cheaper, faster learning), but hard to parallelize
    - Interpretability is no longer as good as LR
-   - XGBoost is the most popular implementation of GBT
-   - LightGBM by Microsoft - faster especially for larger datasets, but can more easily overfit (it produces more complex trees)
+   - **XGBoost** is the most popular implementation of GBT. Categorical values needs to be indexed, but not recommended to convert to OHE (as it would give more importance to continuous features)
+   - **LightGBM** by Microsoft - faster especially for larger datasets, but can more easily overfit (it produces more complex trees). Can accept categorical values directly, but it is not as rich on handling categorical and text features as CatBoost.
+   - **CatBoost** by Yandex (Russian Google) is fast and especially good at categorical features (support OHE, statistical, combined features etc.) and also supports text features. It builds balanced trees (unlike others).
+Here example of XGBoost.
 
 ```python
 from sparkdl.xgboost import XgboostRegressor
@@ -114,8 +117,8 @@ pipeline_model = pipeline.fit(train_df)
   - Stop when centroid positions no longer change
 - Very fast, but too simple
 - Number of clusters need to be specified
-- Will fail to find clusters with cimplex shapes, interlaced clusters etc.
-- Other methods: DBSCAN (best results, but slower), MeanShift, Spectral Clustering
+- Will fail to find clusters with complex shapes, interlaced clusters etc.
+- Other (usually better) methods: DBSCAN (best results, but slower), MeanShift, Spectral Clustering
 - In MLLib we need to convert features to column with dense vector
 
 ```python
@@ -130,7 +133,7 @@ model = kmeans.fit(iris_two_features_df)
 ## Time Series Forecasting (not in scope)
 Types
 - Univariate - one feature (eg. weight)
-- Multivariate - similar to regression with multiple features (eg. acceleration data from gyroscop on 3 axes)
+- Multivariate - similar to regression with multiple features (eg. acceleration data from gyroscope on 3 axes)
   
 Algorithms
 - Prophet (by Facebook) - very easy to use, good results
@@ -163,7 +166,7 @@ Using different courses to learn this, so just few notes for reference.
 - Output from neuron is often recalculated by activation function
   - Sigmoid provides output between 0 and 1 while flattens as you get closer to 0 or 1 (makes it less sensitive to extremes)
   - Tanh provides output between -1 and 1, centered on 0, flattens extremes
-  - ReLU is lienar for values over 0, but "resets" everything bellow 0 to 0. Leaky ReLU is similar, but bellow 0 is not fixed to 0, but to low slope negatives
+  - ReLU is linear for values over 0, but "resets" everything bellow 0 to 0. Leaky ReLU is similar, but bellow 0 is not fixed to 0, but to low slope negatives
   - Softmax is for last layer to get probability between 0 to 1 (classification)
 - Topology is input layer, one or more hidden layers, output layer
 - Some networks are dense (each neuron in one layer is connect to all neuron outputs in previous layer), some are sparse
@@ -182,8 +185,8 @@ Using different courses to learn this, so just few notes for reference.
 
 # Single-node vs. distributed solutions
 ML can be computationally intensive, so it would make sense to use distributed solution. There are two types of parallelism from multi-node perspective:
-- Embarassingly parallel - tasks do not neet to communicate during processing so job is divided and each task can be run on different node. Good example is movie rendering where you can go frame by frame or with hyperparameter tuning in ML.
-- Fine-grained paralellism - tasks need to communicate often. If very often this leads to creating solutions with ultra-low-speed networking (Infiniband to build HPC cluster). ML training might have some parts considered coarse-grained (eg. decision trees are calculated in parallel and then combined together), but especialy in Deep Learning they are fine-grained.
+- Embarrassingly parallel - tasks do not need to communicate during processing so job is divided and each task can be run on different node. Good example is movie rendering where you can go frame by frame or with hyperparameter tuning in ML.
+- Fine-grained parallelism - tasks need to communicate often. If very often this leads to creating solutions with ultra-low-speed networking (Infiniband to build HPC cluster). ML training might have some parts considered coarse-grained (eg. decision trees are calculated in parallel and then combined together), but especially in Deep Learning they are fine-grained.
 
 - Sklearn, XGBoost, LightGBM, CatBoost are single-node solutions
 - MLLib (Spark ML) is distributed solution
@@ -191,10 +194,10 @@ ML can be computationally intensive, so it would make sense to use distributed s
 
 **Horovod** is Databricks tool to provide parallelism to deep learning on Spark = can accelerate DL.
 
-**Hyperopt** is Databricks toold to provide hyperparameter tuning on Spark by running multiple single-node jobs across cluster = can accelerate hyperparameter tuning of single-node implementations, but is **not** making single DL job run in parallel manner.
+**Hyperopt** is Databricks tool to provide hyperparameter tuning on Spark by running multiple single-node jobs across cluster = can accelerate hyperparameter tuning of single-node implementations, but is **not** making single DL job run in parallel manner.
 
 # Training
-First we need to declare model, in this example LiearRegression, where we need to specify features and label.
+First we need to declare model, in this example LinearRegression, where we need to specify features and label.
 
 ```python
 lr = LinearRegression(featuresCol="features", labelCol="price")
@@ -311,7 +314,7 @@ param_grid = (ParamGridBuilder()
 Tuning hyperparameters by validating against test dataset would leak information from test dataset to training. To avoid this we can use cross validation. We split our training dataset into k folds and then we train k models, each time using different fold as validation dataset and rest as training dataset. Then we average the results. This way we can tune hyperparameters and still have clean testing dataset to evaluate overall model performance.
 
 What we do:
-- Create steps in pipeline such as string indexers, vector assempler, model algorith
+- Create steps in pipeline such as string indexers, vector assembler, model algorithm
 - Create evaluator
 - Create param grid
 - Create cross validator
@@ -415,23 +418,23 @@ spark_trials = SparkTrials(parallelism=2)
 # Model evaluation
 
 ## Common metrics
-- rmse (regression) - root mean squared error -> how far are predictions from actual values, lower is better
-- r2 (regression) - r-squared -> how much of variance in data is explained by model, higher is better
-- areaUnderROC (binary classification)
+- **rmse** (regression) - root mean squared error -> how far are predictions from actual values, lower is better
+- **r2** (regression) - r-squared -> how much of variance in data is explained by model, higher is better
+- **areaUnderROC** (binary classification)
   - How well model can separate positive and negative examples, higher is better
   - Based on classification threshold plots following two numbers to create ROC curve
     - True Positive Rate (=recall) -> TP / (TP + FN)
     - False Positive Rate -> FP / (FP + TN)
   - Area under curve (AUC) is 0.5 if model is random, 1.0 if perfect
-- accuracy (classicifation)
+- **accuracy** (classification)
   - How many examples were classified correctly (TP + TN) / (TP + TN + FP + FN)
   - number alone does not tell anything -> for data samples with 99% blue and 1% green, accuracy of 99% is very bad (the same as model that always predicts blue)
-- precission (classicifation)
+- **precision** (classification)
   - What proportion of positive identifications was actually correct? TP / (TP + FP)
   - maximize for costly high-risk treatment (better to have as little false positives as possible = killing healthy person with high-risk unnecessary treatment)
-- recall (classicifation)
+- **recall** (classification)
   - What proportion of actual positives was identified correctly? TP / (TP + FN)
-  - maximize for cheeap harmless treatment (better to have false positive = harmless treatment than false negative = death of unidentified patient)
+  - maximize for cheap harmless treatment (better to have false positive = harmless treatment than false negative = death of unidentified patient)
 
 
 ## Linear Regression - get coefficients and intercept
@@ -457,7 +460,7 @@ pred_df = lr_model.transform(vec_test_df)
 # Show predictions
 pred_df.select("bedrooms", "features", "price", "prediction").show()
 
-# Calcualate root mean squared error and r-squared
+# Calculate root mean squared error and r-squared
 from pyspark.ml.evaluation import RegressionEvaluator
 
 regression_evaluator = RegressionEvaluator(predictionCol="prediction", labelCol="price", metricName="rmse")
@@ -478,7 +481,7 @@ evaluator = BinaryClassificationEvaluator(labelCol="priceClass", rawPredictionCo
 ```
 
 # AutoML
-Automatically try different algorithms and hyperparameters to find best model. It is using SparkTrials to parallelize the process. Currently it does utilize lightgbm, sklearn and xgboost - so no DNNs.
+Automatically try different algorithms and hyperparameters to find best model. It is using SparkTrials to parallelize the process. Currently it does utilize lightgbm, sklearn and xgboost - so no DNNs yet.
 
 ```python
 from databricks import automl

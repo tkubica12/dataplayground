@@ -37,11 +37,11 @@ with mlflow.start_run():
     mlflow.pyfunc.log_model("model", python_model=model)
 ```
 
-Note this is where Azure ML might provide more robust solution:
+**Note this is where Azure ML might provide more robust solution**:
 - Package to Kubernetes or run as managed online endpoints with monitoring, logging, VNET integration, AAD authentication
 - Supports other formats such as Triton for high-performance serving including GPU accelerated inferencing using TensorFlow, ONNX Runtime, PyTorch or NVIDIA TensorRT
 - Easily deploy ONNX models
-- Prebuild and maintained Docker images for serving models for running models anywhere (IoT edge, on-prem, cloud)
+- Prebuilt and maintained Docker images for serving models for running models anywhere (IoT edge, on-prem, cloud)
 
 ## Streaming example
 You can call transform method on streaming table.
