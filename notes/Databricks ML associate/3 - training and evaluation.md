@@ -4,7 +4,6 @@
   - [Random forest](#random-forest)
   - [Gradient Boosting trees](#gradient-boosting-trees)
   - [K-Means (not in scope)](#k-means-not-in-scope)
-  - [Logistic regression (not in scope)](#logistic-regression-not-in-scope)
   - [Time Series Forecasting (not in scope)](#time-series-forecasting-not-in-scope)
   - [Deep Learning (not in scope)](#deep-learning-not-in-scope)
 - [Single-node vs. distributed solutions](#single-node-vs-distributed-solutions)
@@ -28,7 +27,7 @@ y = ax + b
 
 - Liner regression predicts continuous values such as price
 - Logistic regression predicts distinct label values such as 0 or 1 (spam or not spam)
-- Simple, fast to train, can be paralellized with MLLib in Spark
+- Simple, fast to train, can be paralellized with SparkML
 - Easy to interpret - coefficients (weights) of features tell about how model works
 - Easy to tune (less worry about overfitting etc.)
 - Not accurate for complex problems
@@ -54,7 +53,7 @@ lr = LogisticRegression(regParam=0.1, elasticNetParam=1.0, family="multinomial")
 - Just a few hyperparameters to tune (easier)
   - maxDepth - how deep the tree can be
   - maxBins - how many bins to use for continuous features, this is typically has to be at least the size of highest cardinality categorical feature
-- In MLLib we still need to convert all features to vector, but we will not use OHE (just indexer) -> OHE would lead to worse results as algorithm would give more importance to continuous features
+- In SparkML we still need to convert all features to vector, but we will not use OHE (just indexer) -> OHE would lead to worse results as algorithm would give more importance to continuous features
 
 ```python
 dt = DecisionTreeRegressor(labelCol="price")
@@ -69,10 +68,10 @@ list(zip(vec_assembler.getInputCols(), dt_model.featureImportances))
   - Bootstrap aggregation - each tree is trained on a random sample of the data
   - Feature randomness - each tree is trained on a random subset of features
 - Hyperparameters to tune:
-  - Number of trees (numTrees in MLLib, n_estimators in sklearn)
-  - Max depth (maxDepth in MLLib, max_depth in sklearn)
-  - Max bins (maxBins in MLLib,  Max number of bins for discretizing continuous features)
-  - Max features (featureSubsetStrategy in MLLib, max_features in sklearn)
+  - Number of trees (numTrees in SparkML, n_estimators in sklearn)
+  - Max depth (maxDepth in SparkML, max_depth in sklearn)
+  - Max bins (maxBins in SparkML,  Max number of bins for discretizing continuous features)
+  - Max features (featureSubsetStrategy in SparkML, max_features in sklearn)
 
 ```python
 rf = RandomForestRegressor(labelCol="price", maxBins=40)
@@ -93,6 +92,7 @@ rf = RandomForestRegressor(labelCol="price", maxBins=40)
    - **XGBoost** is the most popular implementation of GBT. Categorical values needs to be indexed, but not recommended to convert to OHE (as it would give more importance to continuous features)
    - **LightGBM** by Microsoft - faster especially for larger datasets, but can more easily overfit (it produces more complex trees). Can accept categorical values directly, but it is not as rich on handling categorical and text features as CatBoost.
    - **CatBoost** by Yandex (Russian Google) is fast and especially good at categorical features (support OHE, statistical, combined features etc.) and also supports text features. It builds balanced trees (unlike others).
+   - 
 Here example of XGBoost.
 
 ```python
@@ -119,7 +119,7 @@ pipeline_model = pipeline.fit(train_df)
 - Number of clusters need to be specified
 - Will fail to find clusters with complex shapes, interlaced clusters etc.
 - Other (usually better) methods: DBSCAN (best results, but slower), MeanShift, Spectral Clustering
-- In MLLib we need to convert features to column with dense vector
+- In SparkML we need to convert features to column with dense vector
 
 ```python
 from pyspark.ml.clustering import KMeans
@@ -127,8 +127,6 @@ from pyspark.ml.clustering import KMeans
 kmeans = KMeans(k=3, seed=221, maxIter=20)
 model = kmeans.fit(iris_two_features_df)
 ```
-
-## Logistic regression (not in scope)
 
 ## Time Series Forecasting (not in scope)
 Types
@@ -188,13 +186,21 @@ ML can be computationally intensive, so it would make sense to use distributed s
 - Embarrassingly parallel - tasks do not need to communicate during processing so job is divided and each task can be run on different node. Good example is movie rendering where you can go frame by frame or with hyperparameter tuning in ML.
 - Fine-grained parallelism - tasks need to communicate often. If very often this leads to creating solutions with ultra-low-speed networking (Infiniband to build HPC cluster). ML training might have some parts considered coarse-grained (eg. decision trees are calculated in parallel and then combined together), but especially in Deep Learning they are fine-grained.
 
-- Sklearn, XGBoost, LightGBM, CatBoost are single-node solutions
-- MLLib (Spark ML) is distributed solution
+About models
+- Sklearn is single-node
+- XGBoost, LightGBM, CatBoost support multinode, but it is complex = LightGBM can use SynapseML (by Microsoft) to run distributed on Spark or Dask to run on Python nodes, xgboost.spark to run XGBoost (in Preview in Databricks)
+- SparkML is distributed solution directly on Spark
 - Tensorflow, PyTorch, Keras are single-node solutions, but solutions to make them distributed are available (yet complex).
 
 **Horovod** is Databricks tool to provide parallelism to deep learning on Spark = can accelerate DL.
 
 **Hyperopt** is Databricks tool to provide hyperparameter tuning on Spark by running multiple single-node jobs across cluster = can accelerate hyperparameter tuning of single-node implementations, but is **not** making single DL job run in parallel manner.
+
+**Dask** is Python solution for distributed training.
+
+**Kubeflow** is Kubernetes-native solution for ML workloads for both training and inferencing - great for Tensorflow, plans to support PyTorch, XGBoost
+
+**SynapseML** are tools to ease running distributed ML on top of Spark
 
 # Training
 First we need to declare model, in this example LinearRegression, where we need to specify features and label.
@@ -344,7 +350,7 @@ list(zip(model.getEstimatorParamMaps(), model.avgMetrics))
 ```
 
 ## HyperOpt
-Framework for advanced hyperparameter tuning. Instead of discrete values (like in ParamGrid) we can specify ranges and algorithm is using various techniques to find best values. Also HyperOpt is trying to parallelize the process using SparkTrials class - eg. it can run multiple single-node model training jobs (eg. sklearn) in parallel on different machines. Note SparkTrials are not supported for distributed learning algorithms such as MLLib or Horovod, so use Trials class instead.
+Framework for advanced hyperparameter tuning. Instead of discrete values (like in ParamGrid) we can specify ranges and algorithm is using various techniques to find best values. Also HyperOpt is trying to parallelize the process using SparkTrials class - eg. it can run multiple single-node model training jobs (eg. sklearn) in parallel on different machines. Note SparkTrials are not supported for distributed learning algorithms such as SparkML or Horovod, so use Trials class instead.
 
 Example options for search space:
 - quniform - uniform distribution between low and high, rounded to q (eg. whole numbers only)
@@ -418,8 +424,10 @@ spark_trials = SparkTrials(parallelism=2)
 # Model evaluation
 
 ## Common metrics
-- **rmse** (regression) - root mean squared error -> how far are predictions from actual values, lower is better
-- **r2** (regression) - r-squared -> how much of variance in data is explained by model, higher is better
+- **rmse** (smerodatna odchylka chyb) in regression 
+  - root mean squared error -> how far are predictions from actual values, lower is better
+  - note this is similar to standard deviation, but not the same - standard deviation measures how spread out the values are, while rmse measures how far the predictions are from actual values. In other words rmse includes differences introduced by bias, while standard deviation does not. RMSE = Standard Deviation + Bias
+- **r2** (koeficient determinace) in regression - r-squared -> how much of variance in data is explained by model, higher is better
 - **areaUnderROC** (binary classification)
   - How well model can separate positive and negative examples, higher is better
   - Based on classification threshold plots following two numbers to create ROC curve
@@ -435,6 +443,9 @@ spark_trials = SparkTrials(parallelism=2)
 - **recall** (classification)
   - What proportion of actual positives was identified correctly? TP / (TP + FN)
   - maximize for cheap harmless treatment (better to have false positive = harmless treatment than false negative = death of unidentified patient)
+- **f1** (classification)
+  - Harmonic mean of precision and recall -> 2 * (precision * recall) / (precision + recall)
+  - 1.0 is best, 0.0 is worst
 
 
 ## Linear Regression - get coefficients and intercept
