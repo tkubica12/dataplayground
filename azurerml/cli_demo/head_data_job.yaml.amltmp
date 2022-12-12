@@ -1,0 +1,11 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
+command: |
+  ls ${{inputs.input_data}}
+code: ../src
+inputs:
+  input_data:
+    type: uri_file
+    path: azureml:creditcard_cli:1
+command: "python head_data.py --input_data ${{inputs.input_data}}"
+environment: azureml:AzureML-sklearn-0.24-ubuntu18.04-py37-cpu:46
+compute: itckftsmsixv-instance

@@ -1,0 +1,350 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "source": [
+        "# SDK demo"
+      ],
+      "metadata": {
+        "nteract": {
+          "transient": {
+            "deleting": false
+          }
+        }
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "### Preparation"
+      ],
+      "metadata": {
+        "nteract": {
+          "transient": {
+            "deleting": false
+          }
+        }
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Install Azure ML SDK"
+      ],
+      "metadata": {
+        "nteract": {
+          "transient": {
+            "deleting": false
+          }
+        }
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "!pip install azure-ai-ml"
+      ],
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": "Collecting azure-ai-ml\n  Downloading azure_ai_ml-1.2.0-py3-none-any.whl (4.0 MB)\n\u001b[K     |████████████████████████████████| 4.0 MB 6.3 MB/s eta 0:00:01\n\u001b[?25hRequirement already satisfied: msrest>=0.6.18 in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from azure-ai-ml) (0.7.1)\nRequirement already satisfied: jsonschema<5.0.0,>=4.0.0 in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from azure-ai-ml) (4.16.0)\nCollecting azure-storage-file-datalake<13.0.0\n  Downloading azure_storage_file_datalake-12.9.1-py3-none-any.whl (238 kB)\n\u001b[K     |████████████████████████████████| 238 kB 86.9 MB/s eta 0:00:01\n\u001b[?25hRequirement already satisfied: azure-common<2.0.0,>=1.1 in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from azure-ai-ml) (1.1.28)\nRequirement already satisfied: azure-mgmt-core<2.0.0,>=1.3.0 in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from azure-ai-ml) (1.3.2)\nCollecting marshmallow<4.0.0,>=3.5\n  Downloading marshmallow-3.19.0-py3-none-any.whl (49 kB)\n\u001b[K     |████████████████████████████████| 49 kB 3.2 MB/s  eta 0:00:01\n\u001b[?25hRequirement already satisfied: azure-core!=1.22.0,<2.0.0,>=1.8.0 in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from azure-ai-ml) (1.26.0)\nRequirement already satisfied: pyjwt<3.0.0 in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from azure-ai-ml) (2.4.0)\nCollecting pydash<6.0.0\n  Downloading pydash-5.1.2-py3-none-any.whl (84 kB)\n\u001b[K     |████████████████████████████████| 84 kB 1.0 MB/s  eta 0:00:01\n\u001b[?25hRequirement already satisfied: tqdm<5.0.0 in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from azure-ai-ml) (4.64.1)\nCollecting azure-storage-file-share<13.0.0\n  Downloading azure_storage_file_share-12.10.1-py3-none-any.whl (252 kB)\n\u001b[K     |████████████████████████████████| 252 kB 82.3 MB/s eta 0:00:01\n\u001b[?25hRequirement already satisfied: opencensus-ext-azure<2.0.0 in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from azure-ai-ml) (1.1.7)\nRequirement already satisfied: pyyaml<7.0.0,>=5.1.0 in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from azure-ai-ml) (6.0)\nRequirement already satisfied: typing-extensions<5.0.0 in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from azure-ai-ml) (4.4.0)\nCollecting strictyaml<2.0.0\n  Downloading strictyaml-1.6.2.tar.gz (130 kB)\n\u001b[K     |████████████████████████████████| 130 kB 53.5 MB/s eta 0:00:01\n\u001b[?25hRequirement already satisfied: colorama<0.5.0 in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from azure-ai-ml) (0.4.6)\nRequirement already satisfied: azure-storage-blob<13.0.0,>=12.10.0 in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from azure-ai-ml) (12.13.0)\nRequirement already satisfied: isodate in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from azure-ai-ml) (0.6.1)\nRequirement already satisfied: requests~=2.16 in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from msrest>=0.6.18->azure-ai-ml) (2.28.1)\nRequirement already satisfied: requests-oauthlib>=0.5.0 in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from msrest>=0.6.18->azure-ai-ml) (1.3.1)\nRequirement already satisfied: certifi>=2017.4.17 in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from msrest>=0.6.18->azure-ai-ml) (2022.9.24)\nRequirement already satisfied: pyrsistent!=0.17.0,!=0.17.1,!=0.17.2,>=0.14.0 in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from jsonschema<5.0.0,>=4.0.0->azure-ai-ml) (0.18.1)\nRequirement already satisfied: importlib-resources>=1.4.0; python_version < \"3.9\" in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from jsonschema<5.0.0,>=4.0.0->azure-ai-ml) (5.10.0)\nRequirement already satisfied: attrs>=17.4.0 in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from jsonschema<5.0.0,>=4.0.0->azure-ai-ml) (22.1.0)\nRequirement already satisfied: pkgutil-resolve-name>=1.3.10; python_version < \"3.9\" in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from jsonschema<5.0.0,>=4.0.0->azure-ai-ml) (1.3.10)\nRequirement already satisfied: packaging>=17.0 in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from marshmallow<4.0.0,>=3.5->azure-ai-ml) (21.3)\nRequirement already satisfied: six>=1.11.0 in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from azure-core!=1.22.0,<2.0.0,>=1.8.0->azure-ai-ml) (1.16.0)\nRequirement already satisfied: cryptography>=2.1.4 in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from azure-storage-file-share<13.0.0->azure-ai-ml) (38.0.1)\nRequirement already satisfied: azure-identity<2.0.0,>=1.5.0 in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from opencensus-ext-azure<2.0.0->azure-ai-ml) (1.7.0)\nRequirement already satisfied: psutil>=5.6.3 in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from opencensus-ext-azure<2.0.0->azure-ai-ml) (5.9.3)\nRequirement already satisfied: opencensus<1.0.0,>=0.11.0 in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from opencensus-ext-azure<2.0.0->azure-ai-ml) (0.11.0)\nRequirement already satisfied: python-dateutil>=2.6.0 in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from strictyaml<2.0.0->azure-ai-ml) (2.8.2)\nRequirement already satisfied: idna<4,>=2.5 in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from requests~=2.16->msrest>=0.6.18->azure-ai-ml) (3.4)\nRequirement already satisfied: urllib3<1.27,>=1.21.1 in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from requests~=2.16->msrest>=0.6.18->azure-ai-ml) (1.26.12)\nRequirement already satisfied: charset-normalizer<3,>=2 in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from requests~=2.16->msrest>=0.6.18->azure-ai-ml) (2.1.1)\nRequirement already satisfied: oauthlib>=3.0.0 in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from requests-oauthlib>=0.5.0->msrest>=0.6.18->azure-ai-ml) (3.2.2)\nRequirement already satisfied: zipp>=3.1.0; python_version < \"3.10\" in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from importlib-resources>=1.4.0; python_version < \"3.9\"->jsonschema<5.0.0,>=4.0.0->azure-ai-ml) (3.9.0)\nRequirement already satisfied: pyparsing!=3.0.5,>=2.0.2 in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from packaging>=17.0->marshmallow<4.0.0,>=3.5->azure-ai-ml) (3.0.9)\nRequirement already satisfied: cffi>=1.12 in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from cryptography>=2.1.4->azure-storage-file-share<13.0.0->azure-ai-ml) (1.15.1)\nRequirement already satisfied: msal-extensions~=0.3.0 in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from azure-identity<2.0.0,>=1.5.0->opencensus-ext-azure<2.0.0->azure-ai-ml) (0.3.1)\nRequirement already satisfied: msal<2.0.0,>=1.12.0 in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from azure-identity<2.0.0,>=1.5.0->opencensus-ext-azure<2.0.0->azure-ai-ml) (1.20.0)\nRequirement already satisfied: opencensus-context>=0.1.3 in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from opencensus<1.0.0,>=0.11.0->opencensus-ext-azure<2.0.0->azure-ai-ml) (0.1.3)\nRequirement already satisfied: google-api-core<3.0.0,>=1.0.0; python_version >= \"3.6\" in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from opencensus<1.0.0,>=0.11.0->opencensus-ext-azure<2.0.0->azure-ai-ml) (2.10.2)\nRequirement already satisfied: pycparser in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from cffi>=1.12->cryptography>=2.1.4->azure-storage-file-share<13.0.0->azure-ai-ml) (2.21)\nRequirement already satisfied: portalocker<3,>=1.0; python_version >= \"3.5\" and platform_system != \"Windows\" in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from msal-extensions~=0.3.0->azure-identity<2.0.0,>=1.5.0->opencensus-ext-azure<2.0.0->azure-ai-ml) (2.6.0)\nCollecting protobuf!=3.20.0,!=3.20.1,!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5,<5.0.0dev,>=3.19.5\n  Downloading protobuf-4.21.11-cp37-abi3-manylinux2014_x86_64.whl (409 kB)\n\u001b[K     |████████████████████████████████| 409 kB 63.3 MB/s eta 0:00:01\n\u001b[?25hRequirement already satisfied: googleapis-common-protos<2.0dev,>=1.56.2 in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from google-api-core<3.0.0,>=1.0.0; python_version >= \"3.6\"->opencensus<1.0.0,>=0.11.0->opencensus-ext-azure<2.0.0->azure-ai-ml) (1.56.4)\nRequirement already satisfied: google-auth<3.0dev,>=1.25.0 in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from google-api-core<3.0.0,>=1.0.0; python_version >= \"3.6\"->opencensus<1.0.0,>=0.11.0->opencensus-ext-azure<2.0.0->azure-ai-ml) (2.13.0)\nRequirement already satisfied: rsa<5,>=3.1.4; python_version >= \"3.6\" in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from google-auth<3.0dev,>=1.25.0->google-api-core<3.0.0,>=1.0.0; python_version >= \"3.6\"->opencensus<1.0.0,>=0.11.0->opencensus-ext-azure<2.0.0->azure-ai-ml) (4.9)\nRequirement already satisfied: pyasn1-modules>=0.2.1 in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from google-auth<3.0dev,>=1.25.0->google-api-core<3.0.0,>=1.0.0; python_version >= \"3.6\"->opencensus<1.0.0,>=0.11.0->opencensus-ext-azure<2.0.0->azure-ai-ml) (0.2.8)\nRequirement already satisfied: cachetools<6.0,>=2.0.0 in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from google-auth<3.0dev,>=1.25.0->google-api-core<3.0.0,>=1.0.0; python_version >= \"3.6\"->opencensus<1.0.0,>=0.11.0->opencensus-ext-azure<2.0.0->azure-ai-ml) (5.2.0)\nRequirement already satisfied: pyasn1>=0.1.3 in /anaconda/envs/azureml_py38/lib/python3.8/site-packages (from rsa<5,>=3.1.4; python_version >= \"3.6\"->google-auth<3.0dev,>=1.25.0->google-api-core<3.0.0,>=1.0.0; python_version >= \"3.6\"->opencensus<1.0.0,>=0.11.0->opencensus-ext-azure<2.0.0->azure-ai-ml) (0.4.8)\nBuilding wheels for collected packages: strictyaml\n  Building wheel for strictyaml (setup.py) ... \u001b[?25l-\b \b\\\b \bdone\n\u001b[?25h  Created wheel for strictyaml: filename=strictyaml-1.6.2-py3-none-any.whl size=123923 sha256=60f51677d99c8457e9bf1c34ce768d9adf8506793eb45347c5725b8cecd162bb\n  Stored in directory: /home/azureuser/.cache/pip/wheels/e9/0b/fc/5beda6bad2ff803e820e157845679794a18f83e442da1e9f4d\nSuccessfully built strictyaml\n\u001b[31mERROR: tensorflow 2.2.1 has requirement h5py<2.11.0,>=2.10.0, but you'll have h5py 3.7.0 which is incompatible.\u001b[0m\n\u001b[31mERROR: tensorflow 2.2.1 has requirement numpy<1.19.0,>=1.16.0, but you'll have numpy 1.21.6 which is incompatible.\u001b[0m\n\u001b[31mERROR: tensorflow-gpu 2.2.1 has requirement h5py<2.11.0,>=2.10.0, but you'll have h5py 3.7.0 which is incompatible.\u001b[0m\n\u001b[31mERROR: tensorflow-gpu 2.2.1 has requirement numpy<1.19.0,>=1.16.0, but you'll have numpy 1.21.6 which is incompatible.\u001b[0m\n\u001b[31mERROR: tensorflow-cpu 2.2.1 has requirement h5py<2.11.0,>=2.10.0, but you'll have h5py 3.7.0 which is incompatible.\u001b[0m\n\u001b[31mERROR: tensorflow-cpu 2.2.1 has requirement numpy<1.19.0,>=1.16.0, but you'll have numpy 1.21.6 which is incompatible.\u001b[0m\n\u001b[31mERROR: tensorboardx 2.5.1 has requirement protobuf<=3.20.1,>=3.8.0, but you'll have protobuf 4.21.11 which is incompatible.\u001b[0m\n\u001b[31mERROR: tensorboard 2.2.2 has requirement google-auth<2,>=1.6.3, but you'll have google-auth 2.13.0 which is incompatible.\u001b[0m\n\u001b[31mERROR: ray 2.0.0 has requirement click<=8.0.4,>=7.0, but you'll have click 8.1.3 which is incompatible.\u001b[0m\n\u001b[31mERROR: ray 2.0.0 has requirement grpcio<=1.43.0,>=1.28.1; python_version < \"3.10\", but you'll have grpcio 1.50.0 which is incompatible.\u001b[0m\n\u001b[31mERROR: ray 2.0.0 has requirement protobuf<4.0.0,>=3.15.3, but you'll have protobuf 4.21.11 which is incompatible.\u001b[0m\n\u001b[31mERROR: onnx 1.12.0 has requirement protobuf<=3.20.1,>=3.12.2, but you'll have protobuf 4.21.11 which is incompatible.\u001b[0m\n\u001b[31mERROR: azureml-automl-runtime 1.47.0 has requirement protobuf<=3.20.1, but you'll have protobuf 4.21.11 which is incompatible.\u001b[0m\n\u001b[31mERROR: autokeras 1.0.16 has requirement tensorflow<=2.5.0,>=2.3.0, but you'll have tensorflow 2.2.1 which is incompatible.\u001b[0m\n\u001b[31mERROR: azure-storage-file-datalake 12.9.1 has requirement azure-storage-blob<13.0.0,>=12.14.1, but you'll have azure-storage-blob 12.13.0 which is incompatible.\u001b[0m\nInstalling collected packages: azure-storage-file-datalake, marshmallow, pydash, azure-storage-file-share, strictyaml, azure-ai-ml, protobuf\n  Attempting uninstall: protobuf\n    Found existing installation: protobuf 3.20.1\n    Uninstalling protobuf-3.20.1:\n      Successfully uninstalled protobuf-3.20.1\nSuccessfully installed azure-ai-ml-1.2.0 azure-storage-file-datalake-12.9.1 azure-storage-file-share-12.10.1 marshmallow-3.19.0 protobuf-4.21.11 pydash-5.1.2 strictyaml-1.6.2\n"
+        }
+      ],
+      "execution_count": 3,
+      "metadata": {
+        "gather": {
+          "logged": 1670832180210
+        }
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Import required libraries\r\n",
+        "from azure.ai.ml import MLClient"
+      ],
+      "outputs": [],
+      "execution_count": 6,
+      "metadata": {
+        "jupyter": {
+          "source_hidden": false,
+          "outputs_hidden": false
+        },
+        "nteract": {
+          "transient": {
+            "deleting": false
+          }
+        },
+        "gather": {
+          "logged": 1670832318308
+        }
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Authenticate"
+      ],
+      "metadata": {
+        "nteract": {
+          "transient": {
+            "deleting": false
+          }
+        }
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from azure.identity import DefaultAzureCredential, InteractiveBrowserCredential\r\n",
+        "\r\n",
+        "try:\r\n",
+        "    credential = DefaultAzureCredential()\r\n",
+        "    # Check if given credential can get token successfully.\r\n",
+        "    credential.get_token(\"https://management.azure.com/.default\")\r\n",
+        "except Exception as ex:\r\n",
+        "    # Fall back to InteractiveBrowserCredential in case DefaultAzureCredential not work\r\n",
+        "    # This will open a browser page for\r\n",
+        "    credential = InteractiveBrowserCredential()"
+      ],
+      "outputs": [],
+      "execution_count": 4,
+      "metadata": {
+        "jupyter": {
+          "source_hidden": false,
+          "outputs_hidden": false
+        },
+        "nteract": {
+          "transient": {
+            "deleting": false
+          }
+        },
+        "gather": {
+          "logged": 1670832284266
+        }
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "try:\r\n",
+        "    ml_client = MLClient.from_config(credential=credential)\r\n",
+        "except Exception as ex:\r\n",
+        "    # NOTE: Update following workspace information if not correctly configure before\r\n",
+        "    client_config = {\r\n",
+        "        \"subscription_id\": \"<SUBSCRIPTION_ID>\",\r\n",
+        "        \"resource_group\": \"<RESOURCE_GROUP>\",\r\n",
+        "        \"workspace_name\": \"<AML_WORKSPACE_NAME>\",\r\n",
+        "    }\r\n",
+        "\r\n",
+        "    if client_config[\"subscription_id\"].startswith(\"<\"):\r\n",
+        "        print(\r\n",
+        "            \"please update your <SUBSCRIPTION_ID> <RESOURCE_GROUP> <AML_WORKSPACE_NAME> in notebook cell\"\r\n",
+        "        )\r\n",
+        "        raise ex\r\n",
+        "    else:  # write and reload from config file\r\n",
+        "        import json, os\r\n",
+        "\r\n",
+        "        config_path = \"../.azureml/config.json\"\r\n",
+        "        os.makedirs(os.path.dirname(config_path), exist_ok=True)\r\n",
+        "        with open(config_path, \"w\") as fo:\r\n",
+        "            fo.write(json.dumps(client_config))\r\n",
+        "        ml_client = MLClient.from_config(credential=credential, path=config_path)\r\n",
+        "print(ml_client)"
+      ],
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": "Found the config file in: /config.json\n"
+        }
+      ],
+      "execution_count": 7,
+      "metadata": {
+        "jupyter": {
+          "source_hidden": false,
+          "outputs_hidden": false
+        },
+        "nteract": {
+          "transient": {
+            "deleting": false
+          }
+        },
+        "gather": {
+          "logged": 1670832321307
+        }
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "### Create Data from file"
+      ],
+      "metadata": {
+        "nteract": {
+          "transient": {
+            "deleting": false
+          }
+        }
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from azure.ai.ml.entities import Data\r\n",
+        "from azure.ai.ml.constants import AssetTypes\r\n",
+        "\r\n",
+        "my_data = Data(\r\n",
+        "    path=\"https://tkubicastore.blob.core.windows.net/datasets/creditcard.csv\",\r\n",
+        "    type=AssetTypes.URI_FILE,\r\n",
+        "    description=\"Example dataset for credit card fraud detection\",\r\n",
+        "    name=\"creditcard_sdk\"\r\n",
+        ")\r\n",
+        "\r\n",
+        "ml_client.data.create_or_update(my_data)"
+      ],
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "execution_count": 8,
+          "data": {
+            "text/plain": "Data({'skip_validation': False, 'mltable_schema_url': None, 'referenced_uris': None, 'type': 'uri_file', 'is_anonymous': False, 'auto_increment_version': False, 'name': 'creditcard_sdk', 'description': 'Example dataset for credit card fraud detection', 'tags': {}, 'properties': {}, 'id': '/subscriptions/d3b7888f-c26e-4961-a976-ff9d5b31dfd3/resourceGroups/data-demo-azureml/providers/Microsoft.MachineLearningServices/workspaces/itckftsmsixv/data/creditcard_sdk/versions/1', 'Resource__source_path': None, 'base_path': '/mnt/batch/tasks/shared/LS_root/mounts/clusters/itckftsmsixv-instance/code/dataplayground/azurerml/sdk_demo', 'creation_context': <azure.ai.ml.entities._system_data.SystemData object at 0x7f48612b2c70>, 'serialize': <msrest.serialization.Serializer object at 0x7f4863d26640>, 'version': '1', 'latest_version': None, 'path': 'https://tkubicastore.blob.core.windows.net/datasets/creditcard.csv', 'datastore': None})"
+          },
+          "metadata": {}
+        }
+      ],
+      "execution_count": 8,
+      "metadata": {
+        "jupyter": {
+          "source_hidden": false,
+          "outputs_hidden": false
+        },
+        "nteract": {
+          "transient": {
+            "deleting": false
+          }
+        },
+        "gather": {
+          "logged": 1670832329303
+        }
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "### Run simple job to print this data"
+      ],
+      "metadata": {
+        "nteract": {
+          "transient": {
+            "deleting": false
+          }
+        }
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from azure.ai.ml import command\r\n",
+        "from azure.ai.ml.entities import Data\r\n",
+        "from azure.ai.ml import Input\r\n",
+        "from azure.ai.ml.constants import AssetTypes\r\n",
+        "\r\n",
+        "# === Note on path ===\r\n",
+        "# can be can be a local path or a cloud path. AzureML supports https://`, `abfss://`, `wasbs://` and `azureml://` URIs.\r\n",
+        "# Local paths are automatically uploaded to the default datastore in the cloud.\r\n",
+        "# More details on supported paths: https://docs.microsoft.com/azure/machine-learning/how-to-read-write-data-v2#supported-paths\r\n",
+        "\r\n",
+        "inputs = {\r\n",
+        "    \"input_data\": Input(type=AssetTypes.URI_FILE, path=\"azureml:creditcard_sdk:1\")\r\n",
+        "}\r\n",
+        "\r\n",
+        "job = command(\r\n",
+        "    code=\"../src\", \r\n",
+        "    command=\"python head_data.py --input_data ${{inputs.input_data}}\",\r\n",
+        "    inputs=inputs,\r\n",
+        "    environment=\"AzureML-sklearn-0.24-ubuntu18.04-py37-cpu:46\",\r\n",
+        "    compute=\"itckftsmsixv-instance\",\r\n",
+        ")\r\n",
+        "\r\n",
+        "# submit the command\r\n",
+        "returned_job = ml_client.jobs.create_or_update(job)\r\n",
+        "# get a URL for the status of the job\r\n",
+        "returned_job.services[\"Studio\"].endpoint"
+      ],
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "execution_count": 11,
+          "data": {
+            "text/plain": "'https://ml.azure.com/runs/frosty_stone_brl7cxjqpc?wsid=/subscriptions/d3b7888f-c26e-4961-a976-ff9d5b31dfd3/resourcegroups/data-demo-azureml/workspaces/itckftsmsixv&tid=d6af5f85-2a50-4370-b4b5-9b9a55bcb0dc'"
+          },
+          "metadata": {}
+        }
+      ],
+      "execution_count": 11,
+      "metadata": {
+        "jupyter": {
+          "source_hidden": false,
+          "outputs_hidden": false
+        },
+        "nteract": {
+          "transient": {
+            "deleting": false
+          }
+        },
+        "gather": {
+          "logged": 1670836924527
+        }
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Go to Job run and check its output"
+      ],
+      "metadata": {
+        "nteract": {
+          "transient": {
+            "deleting": false
+          }
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "name": "python38-azureml",
+      "language": "python",
+      "display_name": "Python 3.8 - AzureML"
+    },
+    "language_info": {
+      "name": "python",
+      "version": "3.8.5",
+      "mimetype": "text/x-python",
+      "codemirror_mode": {
+        "name": "ipython",
+        "version": 3
+      },
+      "pygments_lexer": "ipython3",
+      "nbconvert_exporter": "python",
+      "file_extension": ".py"
+    },
+    "kernel_info": {
+      "name": "python38-azureml"
+    },
+    "microsoft": {
+      "host": {
+        "AzureML": {
+          "notebookHasBeenCompleted": true
+        }
+      }
+    },
+    "nteract": {
+      "version": "nteract-front-end@1.0.0"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 2
+}
