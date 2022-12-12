@@ -44,14 +44,8 @@
       "source": [
         "!az extension add --upgrade -n ml"
       ],
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": "\u001b[K - Downloading ..\r\u001b[K - Installing ..\r"
-        }
-      ],
-      "execution_count": 1,
+      "outputs": [],
+      "execution_count": null,
       "metadata": {
         "jupyter": {
           "source_hidden": false,
@@ -82,14 +76,8 @@
       "source": [
         "!az login --identity"
       ],
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": "[\r\n  {\r\n    \"environmentName\": \"AzureCloud\",\r\n    \"homeTenantId\": \"d6af5f85-2a50-4370-b4b5-9b9a55bcb0dc\",\r\n    \"id\": \"d3b7888f-c26e-4961-a976-ff9d5b31dfd3\",\r\n    \"isDefault\": true,\r\n    \"managedByTenants\": [],\r\n    \"name\": \"tokubica\",\r\n    \"state\": \"Enabled\",\r\n    \"tenantId\": \"d6af5f85-2a50-4370-b4b5-9b9a55bcb0dc\",\r\n    \"user\": {\r\n      \"assignedIdentityInfo\": \"MSI\",\r\n      \"name\": \"systemAssignedIdentity\",\r\n      \"type\": \"servicePrincipal\"\r\n    }\r\n  },\r\n  {\r\n    \"environmentName\": \"AzureCloud\",\r\n    \"homeTenantId\": \"d6af5f85-2a50-4370-b4b5-9b9a55bcb0dc\",\r\n    \"id\": \"7bead9cf-e290-4c50-8651-fcc22c9c70a5\",\r\n    \"isDefault\": false,\r\n    \"managedByTenants\": [\r\n      {\r\n        \"tenantId\": \"72f988bf-86f1-41af-91ab-2d7cd011db47\"\r\n      }\r\n    ],\r\n    \"name\": \"tomas2-vs\",\r\n    \"state\": \"Enabled\",\r\n    \"tenantId\": \"d6af5f85-2a50-4370-b4b5-9b9a55bcb0dc\",\r\n    \"user\": {\r\n      \"assignedIdentityInfo\": \"MSI\",\r\n      \"name\": \"systemAssignedIdentity\",\r\n      \"type\": \"servicePrincipal\"\r\n    }\r\n  }\r\n]\r\n\u001b[0m"
-        }
-      ],
-      "execution_count": 2,
+      "outputs": [],
+      "execution_count": null,
       "metadata": {
         "jupyter": {
           "source_hidden": false,
@@ -120,14 +108,8 @@
       "source": [
         "!az ml data create -f data.yaml"
       ],
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": "{\r\n  \"creation_context\": {\r\n    \"created_at\": \"2022-12-12T08:12:13.611570+00:00\",\r\n    \"created_by\": \"admin\",\r\n    \"created_by_type\": \"User\",\r\n    \"last_modified_at\": \"2022-12-12T08:12:13.661961+00:00\"\r\n  },\r\n  \"description\": \"Example dataset for credit card fraud detection\",\r\n  \"id\": \"/subscriptions/d3b7888f-c26e-4961-a976-ff9d5b31dfd3/resourceGroups/data-demo-azureml/providers/Microsoft.MachineLearningServices/workspaces/itckftsmsixv/data/creditcard_cli/versions/1\",\r\n  \"name\": \"creditcard_cli\",\r\n  \"path\": \"https://tkubicastore.blob.core.windows.net/datasets/creditcard.csv\",\r\n  \"properties\": {},\r\n  \"resourceGroup\": \"data-demo-azureml\",\r\n  \"tags\": {},\r\n  \"type\": \"uri_file\",\r\n  \"version\": \"1\"\r\n}\r\n\u001b[0m"
-        }
-      ],
-      "execution_count": 6,
+      "outputs": [],
+      "execution_count": null,
       "metadata": {
         "jupyter": {
           "source_hidden": false,
@@ -145,14 +127,8 @@
       "source": [
         " !az ml data show -n creditcard_cli --version 1"
       ],
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": "{\r\n  \"creation_context\": {\r\n    \"created_at\": \"2022-12-12T08:12:13.611570+00:00\",\r\n    \"created_by\": \"admin\",\r\n    \"created_by_type\": \"User\",\r\n    \"last_modified_at\": \"2022-12-12T08:12:13.661961+00:00\"\r\n  },\r\n  \"description\": \"Example dataset for credit card fraud detection\",\r\n  \"id\": \"/subscriptions/d3b7888f-c26e-4961-a976-ff9d5b31dfd3/resourceGroups/data-demo-azureml/providers/Microsoft.MachineLearningServices/workspaces/itckftsmsixv/data/creditcard_cli/versions/1\",\r\n  \"name\": \"creditcard_cli\",\r\n  \"path\": \"https://tkubicastore.blob.core.windows.net/datasets/creditcard.csv\",\r\n  \"properties\": {},\r\n  \"resourceGroup\": \"data-demo-azureml\",\r\n  \"tags\": {},\r\n  \"type\": \"uri_file\",\r\n  \"version\": \"1\"\r\n}\r\n\u001b[0m"
-        }
-      ],
-      "execution_count": 12,
+      "outputs": [],
+      "execution_count": null,
       "metadata": {
         "jupyter": {
           "source_hidden": false,
@@ -186,14 +162,8 @@
       "source": [
         "!az ml job create --file head_data_job.yaml"
       ],
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": "{\r\n  \"code\": \"azureml:/subscriptions/d3b7888f-c26e-4961-a976-ff9d5b31dfd3/resourceGroups/data-demo-azureml/providers/Microsoft.MachineLearningServices/workspaces/itckftsmsixv/codes/dd3e6328-bb41-4aaf-82ca-1599d4251c26/versions/1\",\r\n  \"command\": \"python head_data.py --input_data ${{inputs.input_data}}\",\r\n  \"compute\": \"azureml:itckftsmsixv-instance\",\r\n  \"creation_context\": {\r\n    \"created_at\": \"2022-12-12T10:00:04.572809+00:00\",\r\n    \"created_by\": \"admin\",\r\n    \"created_by_type\": \"User\"\r\n  },\r\n  \"display_name\": \"orange_machine_jyfkrnrd92\",\r\n  \"environment\": \"azureml:AzureML-sklearn-0.24-ubuntu18.04-py37-cpu:46\",\r\n  \"environment_variables\": {},\r\n  \"experiment_name\": \"cli_demo\",\r\n  \"id\": \"azureml:/subscriptions/d3b7888f-c26e-4961-a976-ff9d5b31dfd3/resourceGroups/data-demo-azureml/providers/Microsoft.MachineLearningServices/workspaces/itckftsmsixv/jobs/orange_machine_jyfkrnrd92\",\r\n  \"inputs\": {\r\n    \"input_data\": {\r\n      \"mode\": \"ro_mount\",\r\n      \"path\": \"azureml:creditcard_cli:1\",\r\n      \"type\": \"uri_file\"\r\n    }\r\n  },\r\n  \"name\": \"orange_machine_jyfkrnrd92\",\r\n  \"outputs\": {\r\n    \"default\": {\r\n      \"mode\": \"rw_mount\",\r\n      \"path\": \"azureml://datastores/workspaceartifactstore/ExperimentRun/dcid.orange_machine_jyfkrnrd92\",\r\n      \"type\": \"uri_folder\"\r\n    }\r\n  },\r\n  \"parameters\": {},\r\n  \"properties\": {\r\n    \"ContentSnapshotId\": \"630a24c3-8cb1-49b6-877f-c14f644f8894\",\r\n    \"_azureml.ComputeTargetType\": \"amlctrain\",\r\n    \"azureml.git.dirty\": \"True\",\r\n    \"mlflow.source.git.branch\": \"azureml\",\r\n    \"mlflow.source.git.commit\": \"ee2ca343e9f7ae2f848f2228805d8bbf627a5cb2\",\r\n    \"mlflow.source.git.repoURL\": \"https://github.com/tkubica12/dataplayground\"\r\n  },\r\n  \"resourceGroup\": \"data-demo-azureml\",\r\n  \"resources\": {\r\n    \"instance_count\": 1,\r\n    \"properties\": {},\r\n    \"shm_size\": \"2g\"\r\n  },\r\n  \"services\": {\r\n    \"Studio\": {\r\n      \"endpoint\": \"https://ml.azure.com/runs/orange_machine_jyfkrnrd92?wsid=/subscriptions/d3b7888f-c26e-4961-a976-ff9d5b31dfd3/resourcegroups/data-demo-azureml/workspaces/itckftsmsixv&tid=d6af5f85-2a50-4370-b4b5-9b9a55bcb0dc\",\r\n      \"job_service_type\": \"Studio\"\r\n    },\r\n    \"Tracking\": {\r\n      \"endpoint\": \"azureml://westeurope.api.azureml.ms/mlflow/v1.0/subscriptions/d3b7888f-c26e-4961-a976-ff9d5b31dfd3/resourceGroups/data-demo-azureml/providers/Microsoft.MachineLearningServices/workspaces/itckftsmsixv?\",\r\n      \"job_service_type\": \"Tracking\"\r\n    }\r\n  },\r\n  \"status\": \"Starting\",\r\n  \"tags\": {},\r\n  \"type\": \"command\"\r\n}\r\n\u001b[0m"
-        }
-      ],
-      "execution_count": 16,
+      "outputs": [],
+      "execution_count": null,
       "metadata": {
         "jupyter": {
           "source_hidden": false,
@@ -211,6 +181,19 @@
       "source": [
         "\r\n",
         "Go to Job run and check its output"
+      ],
+      "metadata": {
+        "nteract": {
+          "transient": {
+            "deleting": false
+          }
+        }
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "### Data split component"
       ],
       "metadata": {
         "nteract": {
