@@ -2,3 +2,8 @@
 .terraform
 .terraform.*
 *.tfstate*
+.ipynb_aml_checkpoints
+*.amltmp 
+*.amltemp
+.amlignore.amltmp
+.amlignore
