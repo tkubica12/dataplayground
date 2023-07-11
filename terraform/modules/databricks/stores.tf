@@ -43,7 +43,7 @@ resource "databricks_grants" "df_identity_access_schema" {
   schema = "${databricks_catalog.main.name}.${databricks_schema.main.name}"
   grant {
     principal  = "account users"
-    privileges = ["USAGE", "CREATE", "CREATE_FUNCTION", "CREATE_TABLE", "CREATE_VIEW", "USE_SCHEMA"]
+    privileges = ["USAGE", "CREATE", "CREATE_FUNCTION", "CREATE_TABLE",  "USE_SCHEMA"] # "CREATE_VIEW",
   }
 }
 

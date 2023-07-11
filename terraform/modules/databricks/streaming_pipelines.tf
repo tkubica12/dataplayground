@@ -1,8 +1,9 @@
 resource "databricks_pipeline" "streaming" {
   name    = "streaming"
-  storage = "/"
+  catalog = databricks_catalog.main.name
   target  = "streaming"
   edition = "PRO"
+  channel = "preview"
 
   cluster {
     label       = "default"
@@ -27,6 +28,12 @@ resource "databricks_pipeline" "streaming" {
   library {
     notebook {
       path = "${databricks_repo.main.path}/databricks/DemoStreaming/delta_live_stream_processing"
+    }
+  }
+
+  library {
+    notebook {
+      path = "${databricks_repo.main.path}/databricks/DemoStreaming/delta_live_engagements"
     }
   }
 

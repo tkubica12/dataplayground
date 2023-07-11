@@ -51,20 +51,29 @@ For TBD see [GitHub Issues](https://github.com/tkubica12/dataplayground/issues?q
 ## Databricks solution
 - Workspace deployed with cluster definitions
 - Unity Catalog using managed identity to access storage layer
-- Using auto-loader to get data from bronze tier to managed Unity Catalog tables (users, vipusers and products)
-- Usign job to ingest data from SQL (orders and items)
-- BI table into gold tier (scheduled as job)
-- Streaming scenario with Delta Live Tables
-  - Processing raw Kafka events from Event Hub
-  - Parsing stream (decode base64 and parse JSON)
-  - Correlate two streams
-  - Identiy high latency pageviews
+- Traditional workflow:
+  - Using auto-loader to get data from bronze tier to managed Unity Catalog tables (users, vipusers and products)
+  - Usign job to ingest data from SQL (orders and items)
+  - BI table into gold tier (scheduled as job)
+- Delta Live Tables
+  - Pure streaming scenario
+    - Processing raw Kafka events from Event Hub
+    - Parsing stream (decode base64 and parse JSON)
+    - Correlate two streams
+    - Identify high latency pageviews
+  - Materialized view - engagements table
+    - Ingest data directly from SQL (orders and items)
+    - Ingest data from storage (users, vipusers and products)
+    - Combine all sources to create aggregated engagements table
 
 For TBD see [GitHub Issues](https://github.com/tkubica12/dataplayground/issues?q=is%3Aissue+is%3Aopen+label%3ADatabricks)
 
 Inputs - there are few input variables you can pass (see inputs.tf):
 - location (westeurope if not changed)
 - existing_metastore_id (if you want to use existing metastore as currently Databricks supports only one per region, otherwise new one will be created)
+
+Stream processing pipeline:
+![DLT](images/dlt.png)
 
 ## My notes for certifications
 - [Databricks ML Associate](notes/Databricks%20ML%20associate/README.md)

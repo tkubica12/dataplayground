@@ -19,6 +19,12 @@ resource "databricks_secret" "storage_account_name" {
   scope        = databricks_secret_scope.azure.id
 }
 
+resource "databricks_secret" "sql_server_name" {
+  key          = "sql_server_name"
+  string_value = var.sql_server_name
+  scope        = databricks_secret_scope.azure.id
+}
+
 resource "databricks_secret" "eventhub_namespace_name" {
   key          = "eventhub_namespace_name"
   string_value = var.eventhub_namespace_name
