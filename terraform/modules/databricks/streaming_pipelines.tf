@@ -3,7 +3,7 @@ resource "databricks_pipeline" "streaming" {
   catalog = databricks_catalog.main.name
   target  = "streaming"
   edition = "PRO"
-  channel = "preview"
+  channel = "preview"     # As of July 2023 preview needed to support Unity Catalog in DLT
 
   cluster {
     label       = "default"

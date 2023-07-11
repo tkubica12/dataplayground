@@ -1,3 +1,5 @@
+# Databricks notebook source
+
 # Get configuration parameters and secrets
 storage_account_name = dbutils.secrets.get(scope="azure", key="storage_account_name")
 eventhub_namespace_name = dbutils.secrets.get(scope="azure", key="eventhub_namespace_name")
