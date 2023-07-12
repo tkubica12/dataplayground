@@ -30,7 +30,7 @@ jobs:
       working-directory: ./terraform/databricks_solution
       run: |
         terraform init -upgrade -backend-config=resource_group_name=base \
-          -backend-config=storage_account_name=tkubicastore \
+          -backend-config=storage_account_name=xtkubicastore \
           -backend-config=container_name=tfstate \
           -backend-config=key=databricks_solution.tfstate \
           -backend-config=subscription_id="d3b7888f-c26e-4961-a976-ff9d5b31dfd3" \
