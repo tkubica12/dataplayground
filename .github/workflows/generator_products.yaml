@@ -7,10 +7,15 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - name: Build Docker Image and Push to GHCR
-      uses: GlueOps/github-actions-build-push-containers@v0.1.0
+    - name: Checkout Repo
+      uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+      
+    - name: Build and push container
+      uses: docker/build-push-action@v4
       with:
-        image_name: generate_products
         context: datageneration/products
-        tags: latest
+        push: true
+        tags: ghcr.io/tkubica12/products-generator:latest
