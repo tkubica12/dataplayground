@@ -1,6 +1,6 @@
 variable "location" {
   type    = string
-  default = "swedencentral"
+  default = "westeurope"
 }
 
 variable "existing_metastore_id" {
