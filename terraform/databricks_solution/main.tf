@@ -22,7 +22,8 @@ module "data_lake" {
   keyvault_id         = azurerm_key_vault.main.id
   users_count         = 10000
   vip_users_count     = 5000
-  products_count      = 1000
+  products_count      = 100000
+  products_rate       = 5
   orders_count        = 10000
 
   depends_on = [

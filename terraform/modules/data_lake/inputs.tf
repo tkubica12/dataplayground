@@ -30,6 +30,11 @@ variable "products_count" {
   default = 100000
 }
   
+variable "products_rate" {
+  type    = number
+  default = 5
+}
+  
 variable "orders_count" {
   type    = number
   default = 10000000
