@@ -29,13 +29,13 @@ jobs:
     - name: Terraform Init
       working-directory: ./terraform/databricks_solution
       run: |
-        terraform init -upgrade -backend-config=resource_group_name=base \
-          -backend-config=storage_account_name=xtkubicastore \
+        terraform init -upgrade \
+          -backend-config=resource_group_name=base \
+          -backend-config=storage_account_name=tkubicastore \
           -backend-config=container_name=tfstate \
           -backend-config=key=databricks_solution.tfstate \
           -backend-config=subscription_id="d3b7888f-c26e-4961-a976-ff9d5b31dfd3" \
-          -backend-config=use_msi=true \
-          -backend-config=client_id=${{ secrets.AZURE_CLIENT_ID }} \
+          -backend-config=use_oidc=true \
           -backend-config=tenant_id=${{ secrets.AZURE_TENANT_ID }}
 
     # - name: Terraform Apply
