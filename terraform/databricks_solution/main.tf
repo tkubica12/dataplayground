@@ -23,7 +23,7 @@ module "data_lake" {
   users_count         = 10000
   vip_users_count     = 5000
   products_count      = 100000
-  products_rate       = 5
+  products_rate       = 2quit
   orders_count        = 10000
 
   depends_on = [

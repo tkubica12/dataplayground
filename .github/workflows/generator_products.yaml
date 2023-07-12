@@ -2,6 +2,10 @@ name: Build and push Products Generator
 
 on:
   workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'datageneration/products/**'
 
 jobs:
   build:

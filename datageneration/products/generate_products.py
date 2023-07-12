@@ -2,6 +2,7 @@ import faker
 import json
 import os
 import time
+from datetime import datetime
 from azure.storage.filedatalake import DataLakeFileClient, DataLakeServiceClient
 
 # Get input parameters from environment
@@ -33,5 +34,5 @@ for index in range(count):
     data = json.dumps(entry)
     file.append_data(data=data, offset=0, length=len(data))
     file.flush_data(len(data))
-    print(f'Record {index} of {count}')
+    print(f'{datetime.now().strftime("%H:%M:%S")} Record {index} of {count}')
     time.sleep(sleep_time)
