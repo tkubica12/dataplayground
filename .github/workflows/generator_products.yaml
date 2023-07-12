@@ -1,0 +1,16 @@
+name: Build and push Products Generator
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build Docker Image and Push to GHCR
+      uses: GlueOps/github-actions-build-push-containers@v0.1.0
+      with:
+        image_name: generate_products
+        context: datageneration/products
+        tags: latest

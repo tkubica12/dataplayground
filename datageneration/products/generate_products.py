@@ -1,11 +1,13 @@
 import faker
 import json
 import os
+import time
 from azure.storage.filedatalake import DataLakeFileClient, DataLakeServiceClient
 
 # Get input parameters from environment
 storageSas = os.getenv('STORAGE_SAS')
 count = int(os.getenv('COUNT', 100))
+sleep_time = 1 / int(os.getenv('RATE', 1))
 
 if not storageSas:
     print('Please provide storage connection string via PRODUCTS_SAS environmental variable')
@@ -32,3 +34,4 @@ for index in range(count):
     file.append_data(data=data, offset=0, length=len(data))
     file.flush_data(len(data))
     print(f'Record {index} of {count}')
+    time.sleep(sleep_time)

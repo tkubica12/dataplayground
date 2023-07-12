@@ -59,6 +59,7 @@ resource "azurerm_container_group" "generate_products" {
 
     environment_variables = {
       "COUNT" = tostring(var.products_count)
+      "RATE" = tostring(var.products_rate)
     }
 
     secure_environment_variables = {
