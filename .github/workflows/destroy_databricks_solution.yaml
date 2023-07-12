@@ -1,10 +1,10 @@
-name: Create Databricks Solution
+name: Destroy Databricks Solution
 
 on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  destroy:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -32,4 +32,4 @@ jobs:
 
     - name: Terraform Apply
       working-directory: ./terraform/databricks_solution
-      run: terraform apply -auto-approve
+      run: terraform destroy -auto-approve
