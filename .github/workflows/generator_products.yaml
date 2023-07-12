@@ -29,4 +29,4 @@ jobs:
       with:
         context: datageneration/products
         push: true
-        tags: ghcr.io/tkubica12/products-generator:latest
+        tags: ghcr.io/tkubica12/generate_products:latest
