@@ -62,7 +62,7 @@ for index in range(count):
     orderId = index + 1
     userId = random.randint(1, user_max_id)
     dateEpoch = random.randint(1281707537, 1660398760)
-    date = datetime.datetime.fromtimestamp(dateEpoch).strftime("%Y-%m-%d %H:%M:%S")
+    date = datetime.fromtimestamp(dateEpoch).strftime("%Y-%m-%d %H:%M:%S")
     value = random.randint(1, 100000)
     if orderCommand == "":
         orderCommand = f'INSERT INTO orders (orderId, userId, orderDate, orderValue) VALUES '
