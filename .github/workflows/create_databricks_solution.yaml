@@ -31,5 +31,8 @@ jobs:
       run: terraform init -upgrade
 
     - name: Terraform Apply
-      working-directory: ./terraform/databricks_solution
-      run: terraform apply -auto-approve
+      uses: nick-fields/retry@v2
+      with:
+        command: cd ./terraform/databricks_solution; terraform apply -auto-approve
+        retry_on: error
+        max_attempts: 2
