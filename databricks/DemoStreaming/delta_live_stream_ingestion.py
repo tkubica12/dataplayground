@@ -1,5 +1,3 @@
-# Databricks notebook source
-
 # Get configuration parameters and secrets
 storage_account_name = dbutils.secrets.get(scope="azure", key="storage_account_name")
 eventhub_namespace_name = dbutils.secrets.get(scope="azure", key="eventhub_namespace_name")
@@ -91,7 +89,9 @@ def stream_products():
 # Orders and items from Azure SQL Database
 url = f"jdbc:sqlserver://{sql_server_name}.database.windows.net:1433;database=orders"
 
-@dlt.table()
+@dlt.table(
+  spark_conf={"pipelines.trigger.interval" : "60 seconds"}
+)
 def stream_orders():
   return (
     spark.read.format("jdbc")
@@ -103,7 +103,9 @@ def stream_orders():
      .load()
  )
 
-@dlt.table()
+@dlt.table(
+  spark_conf={"pipelines.trigger.interval" : "60 seconds"}
+)
 def stream_items():
   return (
     spark.read.format("jdbc")
