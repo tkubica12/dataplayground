@@ -3,7 +3,7 @@ import json
 import os
 import pyodbc
 import random
-import datetime
+from datetime import datetime
 import time
 
 # Get input parameters from environment

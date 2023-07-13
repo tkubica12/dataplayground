@@ -5,7 +5,7 @@ resource "databricks_sql_endpoint" "main" {
   max_num_clusters          = 1
   auto_stop_mins            = 10
   spot_instance_policy      = "COST_OPTIMIZED"
-  enable_serverless_compute = true
+  enable_serverless_compute = false
   warehouse_type            = "PRO"
 
   lifecycle {
