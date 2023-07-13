@@ -36,3 +36,4 @@ jobs:
         command: cd ./terraform/databricks_solution; terraform apply -auto-approve
         retry_on: error
         max_attempts: 2
+        timeout_minutes: 60
