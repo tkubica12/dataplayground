@@ -33,7 +33,7 @@ resource "azurerm_container_group" "generate_users" {
     memory = "2"
 
     environment_variables = {
-      "COUNT" = tostring(var.users_count)
+      "COUNT"     = tostring(var.users_count)
       "VIP_COUNT" = tostring(var.vip_users_count)
     }
 
@@ -59,7 +59,7 @@ resource "azurerm_container_group" "generate_products" {
 
     environment_variables = {
       "COUNT" = tostring(var.products_count)
-      "RATE" = tostring(var.products_rate)
+      "RATE"  = tostring(var.products_rate)
     }
 
     secure_environment_variables = {
@@ -105,12 +105,12 @@ resource "azurerm_container_group" "stream_pageviews" {
 
     environment_variables = {
       "EVENTHUB_NAMESPACE" = azurerm_eventhub_namespace.main.name
-      "USER_MAX_ID"        = tostring(var.users_count -1)
+      "USER_MAX_ID"        = tostring(var.users_count - 1)
     }
 
     secure_environment_variables = {
       "EVENTHUB_CONNECTION_STRING_PAGEVIEWS" = azurerm_eventhub_authorization_rule.pageviewsSender.primary_connection_string
-      "EVENTHUB_CONNECTION_STRING_STARS" = azurerm_eventhub_authorization_rule.starsSender.primary_connection_string
+      "EVENTHUB_CONNECTION_STRING_STARS"     = azurerm_eventhub_authorization_rule.starsSender.primary_connection_string
     }
   }
 }
@@ -132,8 +132,9 @@ resource "azurerm_container_group" "generate_orders" {
 
     environment_variables = {
       "COUNT"          = tostring(var.orders_count)
-      "USER_MAX_ID"    = tostring(var.users_count -1)
-      "PRODUCT_MAX_ID" = tostring(var.products_count -1)
+      "RATE"           = tostring(var.orders_rate)
+      "USER_MAX_ID"    = tostring(var.users_count - 1)
+      "PRODUCT_MAX_ID" = tostring(var.products_count - 1)
       "SQL_SERVER"     = azurerm_mssql_server.main.fully_qualified_domain_name
       "SQL_DATABASE"   = azurerm_mssql_database.orders.name
       "SQL_USER"       = azurerm_mssql_server.main.administrator_login

@@ -4,6 +4,7 @@ import os
 import pyodbc
 import random
 import datetime
+import time
 
 # Get input parameters from environment
 sql_server = os.getenv('SQL_SERVER')
@@ -13,6 +14,7 @@ sql_database = os.getenv('SQL_DATABASE')
 user_max_id = int(os.getenv('USER_MAX_ID', 999999))
 product_max_id = int(os.getenv('PRODUCT_MAX_ID', 999999))
 count = int(os.getenv('COUNT', 10000000))
+sleep_time = 100 / int(os.getenv('RATE', 1))
 
 if not sql_server or not sql_user or not sql_password or not sql_database:
     print('Please provide SQL access parameters SQL_SERVER, SQL_USER, SQL_PASSWORD, SQL_DATABASE')
@@ -79,4 +81,5 @@ for index in range(count):
         cursor.execute(itemCommand[:-1])
         itemCommand = ""
         conn.commit()
-        print(f'Created {index+1} of {count} orders')
+        print(f'{datetime.now().strftime("%H:%M:%S")} Created {index+1} of {count} orders')
+        time.sleep(sleep_time)

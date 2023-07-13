@@ -24,7 +24,8 @@ module "data_lake" {
   vip_users_count     = 5000
   products_count      = 100000
   products_rate       = 3
-  orders_count        = 10000
+  orders_count        = 100000
+  orders_rate         = 3
 
   depends_on = [
     azurerm_role_assignment.currentuser-kv

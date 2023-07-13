@@ -39,4 +39,8 @@ variable "orders_count" {
   type    = number
   default = 10000000
 }
-  
+
+variable "orders_rate" {
+  type    = number
+  default = 5
+}
